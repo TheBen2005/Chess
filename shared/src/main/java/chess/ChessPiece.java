@@ -93,6 +93,10 @@ public class ChessPiece {
         if (type == PieceType.KING){
             return calculator.KingMovesCalculator(pieceColor, type, myPosition, board);
         }
+        if (type == PieceType.KNIGHT){
+            return calculator.KnightMovesCalculator(pieceColor, type, myPosition, board);
+        }
+
 
 
 
