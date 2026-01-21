@@ -77,6 +77,15 @@ public class ChessPiece {
         else if (type == PieceType.ROOK){
             return calculator.RookMovesCalculator(pieceColor, type, myPosition, board);
         }
+
+        Collection<ChessMove> bishop_moves = calculator.BishopMovesCalculator(pieceColor, type, myPosition, board);
+        Collection<ChessMove> rook_moves = calculator.RookMovesCalculator(pieceColor, type, myPosition, board);
+        Collection<ChessMove> queen_moves = new ArrayList<>();
+        queen_moves.addAll(bishop_moves);
+        queen_moves.addAll(rook_moves);
+        if (type == PieceType.QUEEN){
+            return queen_moves;
+        }
         return null;
 
     }
