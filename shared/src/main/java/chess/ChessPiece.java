@@ -74,6 +74,9 @@ public class ChessPiece {
         if (type == PieceType.BISHOP){
             return calculator.BishopMovesCalculator(pieceColor, type, myPosition, board);
         }
+        else if (type == PieceType.ROOK){
+            return calculator.RookMovesCalculator(pieceColor, type, myPosition, board);
+        }
         return null;
 
     }
