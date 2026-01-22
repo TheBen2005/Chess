@@ -87,9 +87,14 @@ public class ChessPiece {
             return queen_moves;
         }
 
-//        if (type == PieceType.PAWN){
-//            return calculator.PawnMovesCalculator(pieceColor, type, myPosition, board);
-//        }
+        if (type == PieceType.PAWN){
+            if (pieceColor == ChessGame.TeamColor.WHITE) {
+                return calculator.PawnMovesCalculatorWhite(pieceColor, type, myPosition, board);
+            }
+            else{
+                return calculator.PawnMovesCalculatorBlack(pieceColor, type, myPosition, board);
+            }
+        }
         if (type == PieceType.KING){
             return calculator.KingMovesCalculator(pieceColor, type, myPosition, board);
         }
