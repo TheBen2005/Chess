@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -51,7 +52,43 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        PieceMovesCalculator calculator = new PieceMovesCalculator();
+        ChessPiece piece = board.getPiece(startPosition);
+        if(piece == null){
+            return null;
+        }
+        else if(piece.getPieceType() == ChessPiece.PieceType.KING){
+            return calculator.KingMovesCalculator(current_team, ChessPiece.PieceType.KING, startPosition, board);
+        }
+        else if(piece.getPieceType() == ChessPiece.PieceType.ROOK){
+            return calculator.RookMovesCalculator(current_team, ChessPiece.PieceType.ROOK, startPosition, board);
+        }
+        else if(piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
+            return calculator.KnightMovesCalculator(current_team, ChessPiece.PieceType.KNIGHT, startPosition, board);
+        }
+        else if(piece.getPieceType() == ChessPiece.PieceType.BISHOP){
+            return calculator.BishopMovesCalculator(current_team, ChessPiece.PieceType.BISHOP, startPosition, board);
+        }
+        else if(piece.getPieceType() == ChessPiece.PieceType.QUEEN){
+            Collection<ChessMove> bishop_moves = calculator.BishopMovesCalculator(current_team, ChessPiece.PieceType.KING, startPosition, board);
+            Collection<ChessMove> rook_moves = calculator.RookMovesCalculator(current_team, ChessPiece.PieceType.KING, startPosition, board);
+            Collection<ChessMove> queen_moves = new ArrayList<>();
+            queen_moves.addAll(bishop_moves);
+            queen_moves.addAll(rook_moves);
+            return queen_moves;
+        }
+        else if(piece.getPieceType() == ChessPiece.PieceType.PAWN){
+            if(piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                return calculator.PawnMovesCalculatorWhite(current_team, ChessPiece.PieceType.PAWN, startPosition, board);
+            }
+            else if(piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                return calculator.PawnMovesCalculatorBlack(current_team, ChessPiece.PieceType.PAWN, startPosition, board);
+            }
+            return null;
+        }
+
+
+        return null;
     }
 
     /**
@@ -101,7 +138,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
