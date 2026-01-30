@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -11,6 +12,7 @@ import java.util.Collection;
  */
 public class ChessGame {
 
+
     private TeamColor current_team;
     private ChessBoard board;
 
@@ -18,6 +20,20 @@ public class ChessGame {
         this.current_team = TeamColor.WHITE;
         this.board = new ChessBoard();
         this.board.resetBoard();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return current_team == chessGame.current_team && Objects.equals(board, chessGame.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(current_team, board);
     }
 
     /**
@@ -98,6 +114,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPosition start_position = move.getStartPosition();
+        Collection<ChessMove> valid_moves = validMoves(start_position);
+        if(valid_moves.contains(move)){
+
+        }
+
         throw new RuntimeException("Not implemented");
     }
 
@@ -147,6 +169,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return this.board;
     }
 }
