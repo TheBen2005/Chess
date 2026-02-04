@@ -196,25 +196,26 @@ public class ChessGame {
                 }
                 return allowed_moves;
             }
-            else if(piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-                available_moves = calculator.PawnMovesCalculatorBlack(current_team, ChessPiece.PieceType.PAWN, startPosition, board);
-                for(ChessMove move : available_moves){
-                    ChessPosition start_position = move.getStartPosition();
-                    ChessPosition end_position = move.getEndPosition();
-                    board.addPiece(end_position, piece);
-                    board.addPiece(start_position, null);
-                    if(isInCheck(piece.getTeamColor())){
-                        board.addPiece(start_position, piece);
-                        board.addPiece(end_position, null);
-                    }
-                    else{
-                        board.addPiece(start_position, piece);
-                        board.addPiece(end_position, null);
-                        allowed_moves.add(move);
-                    }
+        else if(piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            available_moves = calculator.PawnMovesCalculatorBlack(current_team, ChessPiece.PieceType.PAWN, startPosition, board);
+            for(ChessMove move : available_moves){
+                ChessPosition start_position = move.getStartPosition();
+                ChessPosition end_position = move.getEndPosition();
+                board.addPiece(end_position, piece);
+                board.addPiece(start_position, null);
+                System.out.println("Hello");
+                if(isInCheck(piece.getTeamColor())){
+                    board.addPiece(start_position, piece);
+                    board.addPiece(end_position, null);
                 }
-                return allowed_moves;
+                else{
+                    board.addPiece(start_position, piece);
+                    board.addPiece(end_position, null);
+                    allowed_moves.add(move);
+                }
             }
+            return allowed_moves;
+        }
         }
 
 
@@ -235,6 +236,9 @@ public class ChessGame {
         if(piece == null){
             throw new InvalidMoveException("No Piece here.");
         }
+        if(isInCheck(piece.getTeamColor())){
+            throw new InvalidMoveException("Cannot move in check.");
+        }
         else if(piece.getTeamColor() != current_team){
             throw new InvalidMoveException("Not your turn.");
         }
@@ -251,7 +255,8 @@ public class ChessGame {
                             board.addPiece(start_position, piece);
                             throw new InvalidMoveException("Can't move into check.");
                         }
-                    } else {
+                    }
+                    else {
                         board.addPiece(end_position, piece);
                         board.addPiece(start_position, null);
                         if (isInCheck(piece.getTeamColor())) {
@@ -271,7 +276,8 @@ public class ChessGame {
                         board.addPiece(start_position, piece);
                         throw new InvalidMoveException("Can't move into check.");
                     }
-                } else {
+                }
+                else {
                     board.addPiece(end_position, piece);
                     board.addPiece(start_position, null);
 
@@ -281,12 +287,14 @@ public class ChessGame {
                         throw new InvalidMoveException("Can't move into check.");
                     }
                 }
-            } else {
+            }
+            else {
                 throw new InvalidMoveException("Not Legal Move.");
             }
             if (current_team == ChessGame.TeamColor.WHITE) {
                 current_team = ChessGame.TeamColor.BLACK;
-            } else if (current_team == ChessGame.TeamColor.BLACK) {
+            }
+            else if (current_team == ChessGame.TeamColor.BLACK) {
                 current_team = ChessGame.TeamColor.WHITE;
             }
         }
@@ -316,11 +324,29 @@ public class ChessGame {
             for(int j = 1; j <= 8; j++){
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(position);
-                Collection<ChessMove> legal_moves = validMoves(position);
+                PieceMovesCalculator calculator = new PieceMovesCalculator();
+                Collection<ChessMove> legal_moves = new ArrayList<>();
+                if(piece != null){
+                if(piece.getPieceType() == ChessPiece.PieceType.BISHOP){
+                    legal_moves = calculator.BishopMovesCalculator(teamColor, piece.getPieceType(), position, board);
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
+                    legal_moves = calculator.KnightMovesCalculator(teamColor, piece.getPieceType(), position, board);
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.ROOK){
+                    legal_moves = calculator.RookMovesCalculator(teamColor, piece.getPieceType(), position, board);
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.PAWN && teamColor == TeamColor.WHITE){
+                    legal_moves = calculator.PawnMovesCalculatorWhite(teamColor, piece.getPieceType(), position, board);
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.PAWN && teamColor == TeamColor.BLACK){
+                    legal_moves = calculator.PawnMovesCalculatorBlack(teamColor, piece.getPieceType(), position, board);
+                }
                 if(legal_moves != null) {
                     if (legal_moves.contains(new ChessMove(position, king_position, null)) && piece.getTeamColor() != teamColor) {
                         return true;
                     }
+                }
                 }
             }
         }
