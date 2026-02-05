@@ -359,7 +359,7 @@ public class ChessGame {
                     legal_moves = queen_moves;
                 }
                 if(legal_moves != null) {
-                    if (legal_moves.contains(new ChessMove(position, king_position, null)) && piece.getTeamColor() != teamColor) {
+                    if ((legal_moves.contains(new ChessMove(position, king_position, null)) || legal_moves.contains(new ChessMove(position, king_position, ChessPiece.PieceType.ROOK)) || legal_moves.contains(new ChessMove(position, king_position, ChessPiece.PieceType.BISHOP)) || legal_moves.contains(new ChessMove(position, king_position, ChessPiece.PieceType.KNIGHT)) || legal_moves.contains(new ChessMove(position, king_position, ChessPiece.PieceType.QUEEN))) && piece.getTeamColor() != teamColor) {
                         return true;
                     }
                 }
@@ -377,11 +377,11 @@ public class ChessGame {
      */
     public boolean isInCheckmate(ChessGame.TeamColor teamColor) {
         ChessPosition king_position = new ChessPosition(0, 0);
-        for(int i = 1; i <= 8; i++){
-            for(int j = 1; j <= 8; j++){
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(position);
-                if(piece != null) {
+                if (piece != null) {
                     if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
                         king_position = position;
                     }
@@ -390,10 +390,20 @@ public class ChessGame {
         }
         ChessPiece king = board.getPiece(king_position);
         Collection<ChessMove> moves_allowed = validMoves(king_position);
-        if(isInCheck(king.getTeamColor())){
-            if(moves_allowed.size() == 0){
-                return true;
+        if (isInCheck(king.getTeamColor())) {
+            for (int i = 1; i <= 8; i++) {
+                for (int j = 1; j <= 8; j++) {
+                    ChessPosition position = new ChessPosition(i, j);
+                    ChessPiece piece = board.getPiece(position);
+                    if (piece != null && piece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> block_moves = validMoves(position);
+                        if (block_moves.size() >= 1) {
+                            return false;
+                        }
+                    }
+                }
             }
+            return true;
         }
         return false;
 
@@ -408,29 +418,36 @@ public class ChessGame {
      */
     public boolean isInStalemate(ChessGame.TeamColor teamColor) {
         ChessPosition king_position = new ChessPosition(0, 0);
-        for(int i = 1; i <= 8; i++){
-            for(int j = 1; j <= 8; j++){
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(position);
-                Collection<ChessMove> piece_moves = validMoves(position);
-                if(piece != null) {
+                if (piece != null) {
                     if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
                         king_position = position;
                     }
-                if(piece.getTeamColor() == teamColor && piece_moves.size() > 0){
-                    return false;
-                }
                 }
             }
         }
         ChessPiece king = board.getPiece(king_position);
-        Collection<ChessMove> moves_allowed = validMoves(king_position);
-        if(!isInCheck(king.getTeamColor())){
-            if(moves_allowed.size() == 0){
-                return true;
+
+        if (!isInCheck(king.getTeamColor())) {
+            for (int i = 1; i <= 8; i++) {
+                for (int j = 1; j <= 8; j++) {
+                    ChessPosition position = new ChessPosition(i, j);
+                    ChessPiece piece = board.getPiece(position);
+                    if (piece != null && piece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> block_moves = validMoves(position);
+                        if (block_moves != null && block_moves.size() >= 1) {
+                            return false;
+                        }
+                    }
+                }
             }
+            return true;
         }
         return false;
+
     }
 
     /**
