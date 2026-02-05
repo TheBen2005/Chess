@@ -161,7 +161,7 @@ public class PieceMovesCalculator {
         upd_col = position.getColumn();
         while (true) {
             upd_row -= 1;
-            if (upd_row <= 0 || upd_col >= 8) {
+            if (upd_row <= 0 || upd_col > 8) {
                 break;
             }
             ChessPiece piece_2 = Board.getPiece(new ChessPosition(upd_row, upd_col));
