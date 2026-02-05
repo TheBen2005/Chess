@@ -262,18 +262,20 @@ public class PieceMovesCalculator {
             }
 
         }
-        ChessPiece piece_5 = Board.getPiece(new ChessPosition(upd_row, upd_col));
-        if(piece_5 == null){
-            upd_row += 1;
-            if (row == 2) {
-                if (upd_row >= 1 && upd_row <= 8 && upd_col >= 1 && upd_col <= 8) {
-                    ChessPiece piece_6 = Board.getPiece(new ChessPosition(upd_row, upd_col));
-                    if (piece_6 == null) {
-                        moves.add(new ChessMove(position, new ChessPosition(upd_row, upd_col), null));
+        if (upd_row >= 1 && upd_row <= 8 && upd_col >= 1 && upd_col <= 8) {
+            ChessPiece piece_5 = Board.getPiece(new ChessPosition(upd_row, upd_col));
+            if (piece_5 == null) {
+                upd_row += 1;
+                if (row == 2) {
+                    if (upd_row >= 1 && upd_row <= 8 && upd_col >= 1 && upd_col <= 8) {
+                        ChessPiece piece_6 = Board.getPiece(new ChessPosition(upd_row, upd_col));
+                        if (piece_6 == null) {
+                            moves.add(new ChessMove(position, new ChessPosition(upd_row, upd_col), null));
+                        }
                     }
                 }
-            }
 
+            }
         }
         return moves;
 

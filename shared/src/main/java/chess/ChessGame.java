@@ -251,46 +251,45 @@ public class ChessGame {
         Collection<ChessMove> legal_moves = validMoves(start_position);
         if(legal_moves != null) {
             if (legal_moves.contains(move)) {
+                ChessPiece captured_piece = board.getPiece(end_position);
                 if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                     int x = end_position.getRow();
                     if (x == 8 && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
                         board.addPiece(end_position, new ChessPiece(piece.getTeamColor(), promotion_piece));
                         board.addPiece(start_position, null);
                         if (isInCheck(piece.getTeamColor())) {
-                            board.addPiece(end_position, null);
+                            board.addPiece(end_position, captured_piece);
                             board.addPiece(start_position, piece);
                             throw new InvalidMoveException("Can't move into check.");
                         }
-                    }
-                    else {
+                    } else {
                         board.addPiece(end_position, piece);
                         board.addPiece(start_position, null);
                         if (isInCheck(piece.getTeamColor())) {
-                            board.addPiece(end_position, null);
+                            board.addPiece(end_position, captured_piece);
                             board.addPiece(start_position, piece);
                             throw new InvalidMoveException("Can't move into check.");
                         }
                     }
-                }
-            } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-                int y = end_position.getRow();
-                if (y == 1 && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                    board.addPiece(end_position, new ChessPiece(piece.getTeamColor(), promotion_piece));
-                    board.addPiece(start_position, null);
-                    if (isInCheck(piece.getTeamColor())) {
-                        board.addPiece(end_position, null);
-                        board.addPiece(start_position, piece);
-                        throw new InvalidMoveException("Can't move into check.");
-                    }
-                }
-                else {
-                    board.addPiece(end_position, piece);
-                    board.addPiece(start_position, null);
+                } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                    int y = end_position.getRow();
+                    if (y == 1 && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                        board.addPiece(end_position, new ChessPiece(piece.getTeamColor(), promotion_piece));
+                        board.addPiece(start_position, null);
+                        if (isInCheck(piece.getTeamColor())) {
+                            board.addPiece(end_position, captured_piece);
+                            board.addPiece(start_position, piece);
+                            throw new InvalidMoveException("Can't move into check.");
+                        }
+                    } else {
+                        board.addPiece(end_position, piece);
+                        board.addPiece(start_position, null);
 
-                    if (isInCheck(piece.getTeamColor())) {
-                        board.addPiece(end_position, null);
-                        board.addPiece(start_position, piece);
-                        throw new InvalidMoveException("Can't move into check.");
+                        if (isInCheck(piece.getTeamColor())) {
+                            board.addPiece(end_position, captured_piece);
+                            board.addPiece(start_position, piece);
+                            throw new InvalidMoveException("Can't move into check.");
+                        }
                     }
                 }
             }
@@ -377,7 +376,27 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(ChessGame.TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition king_position = new ChessPosition(0, 0);
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if(piece != null) {
+                    if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                        king_position = position;
+                    }
+                }
+            }
+        }
+        ChessPiece king = board.getPiece(king_position);
+        Collection<ChessMove> moves_allowed = validMoves(king_position);
+        if(isInCheck(king.getTeamColor())){
+            if(moves_allowed.size() == 0){
+                return true;
+            }
+        }
+        return false;
+
     }
 
     /**
@@ -388,7 +407,30 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(ChessGame.TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition king_position = new ChessPosition(0, 0);
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                Collection<ChessMove> piece_moves = validMoves(position);
+                if(piece != null) {
+                    if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                        king_position = position;
+                    }
+                if(piece.getTeamColor() == teamColor && piece_moves.size() > 0){
+                    return false;
+                }
+                }
+            }
+        }
+        ChessPiece king = board.getPiece(king_position);
+        Collection<ChessMove> moves_allowed = validMoves(king_position);
+        if(!isInCheck(king.getTeamColor())){
+            if(moves_allowed.size() == 0){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
