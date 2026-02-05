@@ -77,84 +77,88 @@ public class ChessGame {
             return null;
         }
         else if(piece.getPieceType() == ChessPiece.PieceType.KING){
-            available_moves = calculator.KingMovesCalculator(current_team, ChessPiece.PieceType.KING, startPosition, board);
+            available_moves = calculator.KingMovesCalculator(piece.getTeamColor(), ChessPiece.PieceType.KING, startPosition, board);
             for(ChessMove move : available_moves){
                ChessPosition start_position = move.getStartPosition();
                ChessPosition end_position = move.getEndPosition();
+               ChessPiece captured_piece = board.getPiece(end_position);
                board.addPiece(end_position, piece);
                board.addPiece(start_position, null);
                if(isInCheck(piece.getTeamColor())){
                    board.addPiece(start_position, piece);
-                   board.addPiece(end_position, null);
+                   board.addPiece(end_position, captured_piece);
                }
                else{
                    board.addPiece(start_position, piece);
-                   board.addPiece(end_position, null);
+                   board.addPiece(end_position, captured_piece);
                    allowed_moves.add(move);
                }
             }
             return allowed_moves;
         }
         else if(piece.getPieceType() == ChessPiece.PieceType.ROOK){
-            available_moves = calculator.RookMovesCalculator(current_team, ChessPiece.PieceType.ROOK, startPosition, board);
+            available_moves = calculator.RookMovesCalculator(piece.getTeamColor(), ChessPiece.PieceType.ROOK, startPosition, board);
             for(ChessMove move : available_moves){
                 ChessPosition start_position = move.getStartPosition();
                 ChessPosition end_position = move.getEndPosition();
+                ChessPiece captured_piece = board.getPiece(end_position);
                 board.addPiece(end_position, piece);
                 board.addPiece(start_position, null);
                 if(isInCheck(piece.getTeamColor())){
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                 }
                 else{
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                     allowed_moves.add(move);
                 }
             }
             return allowed_moves;
         }
         else if(piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
-            available_moves = calculator.KnightMovesCalculator(current_team, ChessPiece.PieceType.KNIGHT, startPosition, board);
+            available_moves = calculator.KnightMovesCalculator(piece.getTeamColor(), ChessPiece.PieceType.KNIGHT, startPosition, board);
             for(ChessMove move : available_moves){
                 ChessPosition start_position = move.getStartPosition();
                 ChessPosition end_position = move.getEndPosition();
+                ChessPiece captured_piece = board.getPiece(end_position);
                 board.addPiece(end_position, piece);
                 board.addPiece(start_position, null);
                 if(isInCheck(piece.getTeamColor())){
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                 }
                 else{
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                     allowed_moves.add(move);
                 }
             }
             return allowed_moves;
         }
         else if(piece.getPieceType() == ChessPiece.PieceType.BISHOP){
-            available_moves = calculator.BishopMovesCalculator(current_team, ChessPiece.PieceType.BISHOP, startPosition, board);
+            available_moves = calculator.BishopMovesCalculator(piece.getTeamColor(), ChessPiece.PieceType.BISHOP, startPosition, board);
             for(ChessMove move : available_moves){
                 ChessPosition start_position = move.getStartPosition();
                 ChessPosition end_position = move.getEndPosition();
+                ChessPiece captured_piece = board.getPiece(end_position);
                 board.addPiece(end_position, piece);
                 board.addPiece(start_position, null);
                 if(isInCheck(piece.getTeamColor())){
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                 }
                 else{
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                     allowed_moves.add(move);
                 }
             }
             return allowed_moves;
         }
         else if(piece.getPieceType() == ChessPiece.PieceType.QUEEN){
-            Collection<ChessMove> bishop_moves = calculator.BishopMovesCalculator(current_team, ChessPiece.PieceType.KING, startPosition, board);
-            Collection<ChessMove> rook_moves = calculator.RookMovesCalculator(current_team, ChessPiece.PieceType.KING, startPosition, board);
+            Collection<ChessMove> bishop_moves = calculator.BishopMovesCalculator(piece.getTeamColor(), ChessPiece.PieceType.BISHOP, startPosition, board);
+            Collection<ChessMove> rook_moves = calculator.RookMovesCalculator(piece.getTeamColor(), ChessPiece.PieceType.ROOK, startPosition, board);
             Collection<ChessMove> queen_moves = new ArrayList<>();
             queen_moves.addAll(bishop_moves);
             queen_moves.addAll(rook_moves);
@@ -162,15 +166,16 @@ public class ChessGame {
             for(ChessMove move : available_moves){
                 ChessPosition start_position = move.getStartPosition();
                 ChessPosition end_position = move.getEndPosition();
+                ChessPiece captured_piece = board.getPiece(end_position);
                 board.addPiece(end_position, piece);
                 board.addPiece(start_position, null);
                 if(isInCheck(piece.getTeamColor())){
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                 }
                 else{
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                     allowed_moves.add(move);
                 }
             }
@@ -178,39 +183,40 @@ public class ChessGame {
         }
         else if(piece.getPieceType() == ChessPiece.PieceType.PAWN){
             if(piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                available_moves = calculator.PawnMovesCalculatorWhite(current_team, ChessPiece.PieceType.PAWN, startPosition, board);
+                available_moves = calculator.PawnMovesCalculatorWhite(piece.getTeamColor(), ChessPiece.PieceType.PAWN, startPosition, board);
                 for(ChessMove move : available_moves){
                     ChessPosition start_position = move.getStartPosition();
                     ChessPosition end_position = move.getEndPosition();
+                    ChessPiece captured_piece = board.getPiece(end_position);
                     board.addPiece(end_position, piece);
                     board.addPiece(start_position, null);
                     if(isInCheck(piece.getTeamColor())){
                         board.addPiece(start_position, piece);
-                        board.addPiece(end_position, null);
+                        board.addPiece(end_position, captured_piece);
                     }
                     else{
                         board.addPiece(start_position, piece);
-                        board.addPiece(end_position, null);
+                        board.addPiece(end_position, captured_piece);
                         allowed_moves.add(move);
                     }
                 }
                 return allowed_moves;
             }
         else if(piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-            available_moves = calculator.PawnMovesCalculatorBlack(current_team, ChessPiece.PieceType.PAWN, startPosition, board);
+            available_moves = calculator.PawnMovesCalculatorBlack(piece.getTeamColor(), ChessPiece.PieceType.PAWN, startPosition, board);
             for(ChessMove move : available_moves){
                 ChessPosition start_position = move.getStartPosition();
                 ChessPosition end_position = move.getEndPosition();
+                ChessPiece captured_piece = board.getPiece(end_position);
                 board.addPiece(end_position, piece);
                 board.addPiece(start_position, null);
-                System.out.println("Hello");
                 if(isInCheck(piece.getTeamColor())){
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                 }
                 else{
                     board.addPiece(start_position, piece);
-                    board.addPiece(end_position, null);
+                    board.addPiece(end_position, captured_piece);
                     allowed_moves.add(move);
                 }
             }
@@ -328,19 +334,30 @@ public class ChessGame {
                 Collection<ChessMove> legal_moves = new ArrayList<>();
                 if(piece != null){
                 if(piece.getPieceType() == ChessPiece.PieceType.BISHOP){
-                    legal_moves = calculator.BishopMovesCalculator(teamColor, piece.getPieceType(), position, board);
+                    legal_moves = calculator.BishopMovesCalculator(piece.getTeamColor(), piece.getPieceType(), position, board);
                 }
                 else if(piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
-                    legal_moves = calculator.KnightMovesCalculator(teamColor, piece.getPieceType(), position, board);
+                    legal_moves = calculator.KnightMovesCalculator(piece.getTeamColor(), piece.getPieceType(), position, board);
                 }
                 else if(piece.getPieceType() == ChessPiece.PieceType.ROOK){
-                    legal_moves = calculator.RookMovesCalculator(teamColor, piece.getPieceType(), position, board);
+                    legal_moves = calculator.RookMovesCalculator(piece.getTeamColor(), piece.getPieceType(), position, board);
                 }
-                else if(piece.getPieceType() == ChessPiece.PieceType.PAWN && teamColor == TeamColor.WHITE){
-                    legal_moves = calculator.PawnMovesCalculatorWhite(teamColor, piece.getPieceType(), position, board);
+                else if(piece.getPieceType() == ChessPiece.PieceType.PAWN && piece.getTeamColor() == TeamColor.WHITE){
+                    legal_moves = calculator.PawnMovesCalculatorWhite(piece.getTeamColor(), piece.getPieceType(), position, board);
                 }
-                else if(piece.getPieceType() == ChessPiece.PieceType.PAWN && teamColor == TeamColor.BLACK){
-                    legal_moves = calculator.PawnMovesCalculatorBlack(teamColor, piece.getPieceType(), position, board);
+                else if(piece.getPieceType() == ChessPiece.PieceType.PAWN && piece.getTeamColor() == TeamColor.BLACK){
+                    legal_moves = calculator.PawnMovesCalculatorBlack(piece.getTeamColor(), piece.getPieceType(), position, board);
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.KING){
+                    legal_moves = calculator.KingMovesCalculator(piece.getTeamColor(), piece.getPieceType(), position, board);
+                }
+                else if(piece.getPieceType() == ChessPiece.PieceType.QUEEN){
+                    Collection<ChessMove> bishop_moves = calculator.BishopMovesCalculator(piece.getTeamColor(), piece.getPieceType(), position, board);
+                    Collection<ChessMove> rook_moves = calculator.RookMovesCalculator(piece.getTeamColor(), piece.getPieceType(), position, board);
+                    Collection<ChessMove> queen_moves = new ArrayList<>();
+                    queen_moves.addAll(bishop_moves);
+                    queen_moves.addAll(rook_moves);
+                    legal_moves = queen_moves;
                 }
                 if(legal_moves != null) {
                     if (legal_moves.contains(new ChessMove(position, king_position, null)) && piece.getTeamColor() != teamColor) {

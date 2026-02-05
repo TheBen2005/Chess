@@ -344,8 +344,9 @@ public class PieceMovesCalculator {
             }
 
         }
+        if (upd_row >= 1 && upd_row <= 8 && upd_col >= 1 && upd_col <= 8) {
         ChessPiece piece_5 = Board.getPiece(new ChessPosition(upd_row, upd_col));
-        if(piece_5 == null){
+        if(piece_5 == null) {
             upd_row -= 1;
             if (row == 7) {
                 if (upd_row >= 1 && upd_row <= 8 && upd_col >= 1 && upd_col <= 8) {
@@ -355,6 +356,7 @@ public class PieceMovesCalculator {
                     }
                 }
             }
+        }
 
         }
         return moves;
