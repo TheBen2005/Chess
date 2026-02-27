@@ -44,6 +44,7 @@ public class Server {
         UserService userService = new UserService();
         var serializer = new Gson();
         LogoutRequest logoutRequest = serializer.fromJson(userInfo.body(), LogoutRequest.class);
+        userService.logout(logoutRequest);
     }
 
     private void listGamesHandler(userInfo){
@@ -65,6 +66,7 @@ public class Server {
         GameService gameService = new GameService();
         var serializer = new Gson();
         JoinGameRequest joinGameRequest =  serializer.fromJson(userInfo.body(), JoinGameRequest.class);
+        gameService.joingame(joinGameRequest);
 
 
     }
