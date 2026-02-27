@@ -32,7 +32,7 @@ public class Server {
         RegisterResult registerResult = userService.register(registerRequest);
     }
 
-    private void loginHandler(userInfo){
+    private void loginHandler(Context userInfo){
         UserService userService = new UserService();
         var serializer = new Gson();
         LoginRequest loginRequest = serializer.fromJson(userInfo.body(), LoginRequest.class);
@@ -40,21 +40,21 @@ public class Server {
 
     }
 
-    private void logoutHandler(userInfo){
+    private void logoutHandler(Context userInfo){
         UserService userService = new UserService();
         var serializer = new Gson();
         LogoutRequest logoutRequest = serializer.fromJson(userInfo.body(), LogoutRequest.class);
         userService.logout(logoutRequest);
     }
 
-    private void listGamesHandler(userInfo){
+    private void listGamesHandler(Context userInfo){
         GameService gameService = new GameService();
         var serializer = new Gson();
         ListGamesRequest listGamesRequest = serializer.fromJson(userInfo.body(), ListGamesRequest.class);
         ListGamesResult listGamesResult = gameService.listgames(listGamesRequest);
     }
 
-    private void createGameHandler(userInfo){
+    private void createGameHandler(Context userInfo){
         GameService gameService = new GameService();
         var serializer = new Gson();
         CreateGameRequest createGameRequest =  serializer.fromJson(userInfo.body(), CreateGameRequest.class);
@@ -62,7 +62,7 @@ public class Server {
 
     }
 
-    private void joinGameHandler(userInfo){
+    private void joinGameHandler(Context userInfo){
         GameService gameService = new GameService();
         var serializer = new Gson();
         JoinGameRequest joinGameRequest =  serializer.fromJson(userInfo.body(), JoinGameRequest.class);
@@ -71,7 +71,7 @@ public class Server {
 
     }
 
-    private void clearApplicationHandler(userInfo){
+    private void clearApplicationHandler(Context userInfo){
         ClearService clearService = new ClearService();
         clearService.clear();
 
