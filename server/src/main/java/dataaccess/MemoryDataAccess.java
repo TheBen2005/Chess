@@ -14,7 +14,7 @@ public class MemoryDataAccess implements DataAccess{
 
 
 
-    public UserData getUser(String username){
+    public UserData getUser(String username) throws DataAccessException{
         for(UserData user : userList){
             if(user.username() == username){
                 throw new DataAccessException("already taken")
@@ -23,12 +23,13 @@ public class MemoryDataAccess implements DataAccess{
         return null;
     }
 
-    public UserData createUser(UserData userData){
+    public UserData createUser(UserData userData) throws DataAccessException{
+        userList.add(userData);
 
     }
 
-    public void createAuth(AuthData authData){
-
+    public void createAuth(AuthData authData) throws DataAccessException{
+        AuthData.add(authData);
     }
 
     public void deleteAuth(String authToken){

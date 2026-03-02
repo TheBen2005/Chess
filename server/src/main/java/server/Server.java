@@ -53,10 +53,19 @@ public class Server {
     }
 
     private void loginHandler(Context userInfo){
-        UserService userService = new UserService();
-        var serializer = new Gson();
-        LoginRequest loginRequest = serializer.fromJson(userInfo.body(), LoginRequest.class);
-        LoginResult loginResult = userService.login(loginRequest);
+        try{
+            UserService userService = new UserService();
+            var serializer = new Gson();
+            LoginRequest loginRequest = serializer.fromJson(userInfo.body(), LoginRequest.class);
+            LoginResult loginResult = userService.login(loginRequest);
+            userInfo.json(loginResult);
+            userInfo.status(200);
+        }
+        catch(DataAccessException dataAccessException){
+            userInfo.json(new ResultError("Error: " dataAccessException.getMessage()));
+            userInfo.status(401);
+        }
+
 
     }
 

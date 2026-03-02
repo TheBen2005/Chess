@@ -15,15 +15,24 @@ public class UserService {
         }
         String username = registerRequest.username();
         dataAccess.getUser(username);
-        DataAccess.createUser(registerRequest);
+        dataAccess.createUser(registerRequest);
         String token = GenerateToken.generateToken();
         AuthData authData = new AuthData(token, username);
+        dataAccess.createAuth(authData);
         RegisterResult registerResult = new RegisterResult(username, token);
         return registerResult;
     }
 
-    public LoginResult login(LoginRequest loginRequest){
-        return null;
+    public LoginResult login(LoginRequest loginRequest) throws DataAccessException{
+        DataAccess dataAccess = new MemoryDataAccess();
+        if(loginRequest.username() == null){
+            throw new DataAccessException("unauthorized");
+        }
+        UserData user = dataAccess.getUser(loginRequest.username());
+        if(user.password != loginRequest.password){
+            throw new DataAccessException("unauthorized");
+
+        }
     }
 
     public void logout(LogoutRequest logoutRequest){
