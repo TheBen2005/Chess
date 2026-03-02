@@ -149,10 +149,33 @@ public class Server {
     }
 
     private void joinGameHandler(Context userInfo){
-        GameService gameService = new GameService();
-        var serializer = new Gson();
-        JoinGameRequest joinGameRequest =  serializer.fromJson(userInfo.body(), JoinGameRequest.class);
-        gameService.joingame(joinGameRequest);
+        try {
+            GameService gameService = new GameService();
+            var serializer = new Gson();
+            JoinGameRequest joinGameRequest = serializer.fromJson(userInfo.body(), JoinGameRequest.class);
+            gameService.joingame(joinGameRequest);
+            userInfo.status(200);
+        }
+        catch (DataAccessException dataAccessException) {
+            if (dataAccessException.getMessage() == "bad request") {
+                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+                userInfo.status(400);
+            }
+            else if (dataAccessException.getMessage() == "unauthorized") {
+                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+                userInfo.status(401);
+            }
+            else if (dataAccessException.getMessage() == "already taken") {
+                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+                userInfo.status(403);
+            }
+
+            else {
+                userInfo.json(new ResultError("Error: Something is wrong"));
+                userInfo.status(500);
+            }
+        }
+
 
 
     }

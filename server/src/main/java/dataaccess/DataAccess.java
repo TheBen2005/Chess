@@ -22,7 +22,7 @@ public interface DataAccess {
 
     public void createGame(GameData gameData);
 
-    public void getGame(int gameId);
+    public void getGame(int gameId) throws DataAccessException;
 
     public void updateGame(GameData gameData);
 

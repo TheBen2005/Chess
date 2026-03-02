@@ -55,7 +55,13 @@ public class MemoryDataAccess implements DataAccess{
 
     }
 
-    public void getGame(int gameId){
+    public void getGame(int gameId) throws DataAccessException{
+        for(GameData game : gameList){
+            if(game.gameID == gameId){
+                return game;
+            }
+        }
+        throw new DataAccessException("bad request");
 
     }
 

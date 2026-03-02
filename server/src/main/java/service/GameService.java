@@ -32,6 +32,11 @@ public class GameService {
     }
 
     public void joingame(JoinGameRequest joinGameRequest){
+        DataAccess dataAccess = new MemoryDataAccess();
+        AuthData authData = dataAccess.getAuth(listGamesRequest.authtoken);
+        GameData gameData = dataAccess.getGame(joinGameRequest.gameId);
+        dataAccess.updateGame(gameData);
+
 
     }
 
