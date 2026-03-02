@@ -40,6 +40,10 @@ public class UserService {
     }
 
     public void logout(LogoutRequest logoutRequest){
+        DataAccess dataAccess = new MemoryDataAccess();
+        dataAccess.getAuth(logoutRequest.authtoken);
+        dataAccess.deleteAuth(logoutRequest.authtoken);
+
 
     }
 }

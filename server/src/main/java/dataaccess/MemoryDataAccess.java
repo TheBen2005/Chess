@@ -10,7 +10,7 @@ import java.util.List;
 public class MemoryDataAccess implements DataAccess{
     List<UserData> userList = new ArrayList<>();
     List<GameData> gameList = new ArrayList<>();
-    List<AuthData> AuthData = new ArrayList<>();
+    List<AuthData> authList = new ArrayList<>();
 
 
 
@@ -29,11 +29,21 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     public void createAuth(AuthData authData) throws DataAccessException{
-        AuthData.add(authData);
+        authList.add(authData);
     }
 
     public void deleteAuth(String authToken){
+        authList.remove(authToken);
 
+    }
+
+    public void getAuth(String authToken) throws DataAccessException{
+        for(AuthData auth : authList){
+            if(auth.equals(authToken)){
+                return auth;
+            }
+        }
+        throw new DataAccessException("unauthorized");
     }
 
     public void listGames(){
@@ -63,7 +73,7 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     public void clearAuth() throws DataAccessException{
-        AuthData.clear();
+        authList.clear();
     }
 
 

@@ -6,13 +6,15 @@ import model.UserData;
 
 public interface DataAccess {
 
-    public UserData getUser(String username);
+    public UserData getUser(String username throws DataAccessException);
 
-    public UserData createUser(UserData userData);
+    public UserData createUser(UserData userData) throws DataAccessException;
 
-    public void createAuth(AuthData authData);
+    public void createAuth(AuthData authData) throws DataAccessException;
 
     public void deleteAuth(String authToken);
+
+    public void getAuth(String authtoken) throws DataAccessException;
 
     public void listGames();
 
