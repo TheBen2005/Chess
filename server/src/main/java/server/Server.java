@@ -124,10 +124,27 @@ public class Server {
     }
 
     private void createGameHandler(Context userInfo){
-        GameService gameService = new GameService();
-        var serializer = new Gson();
-        CreateGameRequest createGameRequest =  serializer.fromJson(userInfo.body(), CreateGameRequest.class);
-        CreateGamesResult createGamesResult = gameService.creategame(createGameRequest);
+        try {
+            GameService gameService = new GameService();
+            var serializer = new Gson();
+            CreateGameRequest createGameRequest = serializer.fromJson(userInfo.body(), CreateGameRequest.class);
+            CreateGamesResult createGamesResult = gameService.creategame(createGameRequest);
+            userInfo.json(createGamesResult);
+            userInfo.status(200);
+        }
+        catch (DataAccessException dataAccessException) {
+            if (dataAccessException.getMessage() == "bad request") {
+                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+                userInfo.status(400);
+            }
+            if (dataAccessException.getMessage() == "unauthorized") {
+                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+                userInfo.status(401);
+            } else {
+                userInfo.json(new ResultError("Error: Something is wrong"));
+                userInfo.status(500);
+            }
+        }
 
     }
 

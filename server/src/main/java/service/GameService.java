@@ -20,6 +20,14 @@ public class GameService {
     }
 
     public CreateGamesResult creategame(CreateGameRequest createGamesRequest){
+        DataAccess dataAccess = new MemoryDataAccess();
+        AuthData authData = dataAccess.getAuth(createGamesRequest.authtoken);
+        dataAccess.createGame(GameData);
+        int gameid = GameData.gameid;
+        CreateGamesResult createGamesResult = new CreateGamesResult(gameid);
+        return createGamesResult;
+
+
 
     }
 
