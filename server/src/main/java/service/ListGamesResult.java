@@ -2,5 +2,7 @@ package service;
 
 import chess.ChessGame;
 
-public record ListGamesResult(list<ChessGame> game, String whiteusername, String blackusername, String gameName) {
+import java.util.List;
+
+public record ListGamesResult(List<ChessGame> game, String whiteusername, String blackusername, String gameName) {
 }

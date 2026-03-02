@@ -46,7 +46,8 @@ public class MemoryDataAccess implements DataAccess{
         throw new DataAccessException("unauthorized");
     }
 
-    public void listGames(){
+    public List<GameData> listGames(){
+        return gameList;
 
     }
 

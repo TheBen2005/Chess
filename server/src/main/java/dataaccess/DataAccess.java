@@ -4,6 +4,8 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.util.List;
+
 public interface DataAccess {
 
     public UserData getUser(String username throws DataAccessException);
@@ -16,7 +18,7 @@ public interface DataAccess {
 
     public void getAuth(String authtoken) throws DataAccessException;
 
-    public void listGames();
+    public List<GameData> listGames();
 
     public void createGame(GameData gameData);
 
