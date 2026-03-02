@@ -6,9 +6,9 @@ import model.UserData;
 
 public interface DataAccess {
 
-    public void getUser(String username);
+    public UserData getUser(String username);
 
-    public void createUser(UserData userData);
+    public UserData createUser(UserData userData);
 
     public void createAuth(AuthData authData);
 

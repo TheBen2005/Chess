@@ -27,10 +27,29 @@ public class Server {
     }
 
     private void registerHandler(Context userInfo){
-        UserService userService = new UserService();
-        var serializer = new Gson();
-        RegisterRequest registerRequest = serializer.fromJson(userInfo.body(), RegisterRequest.class);
-        RegisterResult registerResult = userService.register(registerRequest);
+        try {
+            UserService userService = new UserService();
+            var serializer = new Gson();
+            RegisterRequest registerRequest = serializer.fromJson(userInfo.body(), RegisterRequest.class);
+            RegisterResult registerResult = userService.register(registerRequest);
+            userInfo.json(registerResult);
+            userInfo.status(200);
+        }
+        catch(DataAccessException dataAccessException){
+            if(dataAccessException.getMessage() == "bad request"){
+                userInfo.json(new ResultError("Error: " dataAccessException.getMessage()));
+                userInfo.status(400);
+            }
+            else if(dataAccessException.getMessage() == "already taken"){
+                userInfo.json(new ResultError("Error: " dataAccessException.getMessage()));
+                userInfo.status(403);
+            }
+            else{
+                userInfo.json(new ResultError("Error: Something is wrong"));
+                userInfo.status(500);
+            }
+
+        }
     }
 
     private void loginHandler(Context userInfo){

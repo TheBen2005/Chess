@@ -14,11 +14,16 @@ public class MemoryDataAccess implements DataAccess{
 
 
 
-    public void getUser(String username){
-
+    public UserData getUser(String username){
+        for(UserData user : userList){
+            if(user.username() == username){
+                throw new DataAccessException("already taken")
+            }
+        }
+        return null;
     }
 
-    public void createUser(UserData userData){
+    public UserData createUser(UserData userData){
 
     }
 
