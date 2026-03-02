@@ -62,18 +62,43 @@ public class Server {
             userInfo.status(200);
         }
         catch(DataAccessException dataAccessException){
-            userInfo.json(new ResultError("Error: " dataAccessException.getMessage()));
-            userInfo.status(401);
+            if(dataAccessException.getMessage() == "bad request") {
+                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+                userInfo.status(400);
+            }
+            if(dataAccessException.getMessage() == "unauthorized") {
+                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+                userInfo.status(401);
+            }
+            else{
+                userInfo.json(new ResultError("Error: Something is wrong"));
+                userInfo.status(500);
+            }
+
         }
 
 
     }
 
     private void logoutHandler(Context userInfo){
-        UserService userService = new UserService();
-        var serializer = new Gson();
-        LogoutRequest logoutRequest = serializer.fromJson(userInfo.body(), LogoutRequest.class);
-        userService.logout(logoutRequest);
+        try {
+            UserService userService = new UserService();
+            var serializer = new Gson();
+            LogoutRequest logoutRequest = serializer.fromJson(userInfo.body(), LogoutRequest.class);
+            userService.logout(logoutRequest);
+            userInfo.status(200);
+        }
+        catch(DataAccessException dataAccessException){
+            if(dataAccessException.getMessage() == "unauthorized") {
+                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+                userInfo.status(401);
+            }
+            else{
+                userInfo.json(new ResultError("Error: Something is wrong"));
+                userInfo.status(500);
+            }
+
+        }
     }
 
     private void listGamesHandler(Context userInfo){

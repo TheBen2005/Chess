@@ -17,10 +17,10 @@ public class MemoryDataAccess implements DataAccess{
     public UserData getUser(String username) throws DataAccessException{
         for(UserData user : userList){
             if(user.username() == username){
-                throw new DataAccessException("already taken")
+                return user;
             }
         }
-        return null;
+        throw new DataAccessException("already taken");
     }
 
     public UserData createUser(UserData userData) throws DataAccessException{
