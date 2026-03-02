@@ -22,9 +22,9 @@ public interface DataAccess {
 
     public void updateGame(GameData gameData);
 
-    public void clearUsers();
+    public void clearUsers() throws DataAccessException;
 
-    public void clearGames();
+    public void clearGames() throws DataAccessException;
 
-    public void clearAuth();
+    public void clearAuth() throws DataAccessException;
 }

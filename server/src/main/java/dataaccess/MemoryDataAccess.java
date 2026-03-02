@@ -46,16 +46,18 @@ public class MemoryDataAccess implements DataAccess{
 
     }
 
-    public void clearUsers(){
+    public void clearUsers() throws DataAccessException{
+        userList.clear();
 
     }
 
-    public void clearGames(){
+    public void clearGames() throws DataAccessException{
+        gameList.clear();
 
     }
 
-    public void clearAuth(){
-
+    public void clearAuth() throws DataAccessException{
+        AuthData.clear();
     }
 
 

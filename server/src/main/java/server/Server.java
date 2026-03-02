@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.*;
 
 import io.javalin.http.Context;
@@ -72,8 +73,16 @@ public class Server {
     }
 
     private void clearApplicationHandler(Context userInfo){
-        ClearService clearService = new ClearService();
-        clearService.clear();
+        try {
+            ClearService clearService = new ClearService();
+            clearService.clear();
+            userInfo.json("{}");
+            userInfo.status(200);
+        }
+        catch (DataAccessException dataAccessException){
+            userInfo.json(new ResultError("Error: " dataAccessException.getMessage()));
+            userInfo.status(500);
+        }
 
     }
 
