@@ -20,7 +20,7 @@ public class MemoryDataAccess implements DataAccess{
                 return user;
             }
         }
-        throw new DataAccessException("already taken");
+        return null;
     }
 
     public UserData createUser(UserData userData) throws DataAccessException{

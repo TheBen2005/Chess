@@ -14,8 +14,12 @@ public class UserService {
             throw new DataAccessException("bad request");
         }
         String username = registerRequest.username();
-        dataAccess.getUser(username);
-        dataAccess.createUser(registerRequest);
+        UserData user = dataAccess.getUser(username);
+        if(user != null){
+            throw new DataAccessException("already taken");
+        }
+        UserData userData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+        dataAccess.createUser(userData);
         String token = GenerateToken.generateToken();
         AuthData authData = new AuthData(token, username);
         dataAccess.createAuth(authData);
@@ -29,7 +33,7 @@ public class UserService {
             throw new DataAccessException("bad request");
         }
         UserData user = dataAccess.getUser(loginRequest.username());
-        if(user.password != loginRequest.password){
+        if(user.password() != loginRequest.password()){
             throw new DataAccessException("unauthorized");
         }
         String token = GenerateToken.generateToken();
@@ -41,8 +45,8 @@ public class UserService {
 
     public void logout(LogoutRequest logoutRequest){
         DataAccess dataAccess = new MemoryDataAccess();
-        dataAccess.getAuth(logoutRequest.authtoken);
-        dataAccess.deleteAuth(logoutRequest.authtoken);
+        dataAccess.getAuth(logoutRequest.authtoken());
+        dataAccess.deleteAuth(logoutRequest.authtoken());
 
 
     }
