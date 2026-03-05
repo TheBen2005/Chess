@@ -16,13 +16,13 @@ public interface DataAccess {
 
     public void deleteAuth(String authToken);
 
-    public void getAuth(String authtoken) throws DataAccessException;
+    public AuthData getAuth(String authtoken) throws DataAccessException;
 
     public List<GameData> listGames();
 
     public void createGame(GameData gameData);
 
-    public void getGame(int gameId) throws DataAccessException;
+    public GameData getGame(int gameId) throws DataAccessException;
 
     public void updateGame(GameData gameData);
 

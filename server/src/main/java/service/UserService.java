@@ -43,7 +43,7 @@ public class UserService {
         return loginResult;
     }
 
-    public void logout(LogoutRequest logoutRequest){
+    public void logout(LogoutRequest logoutRequest) throws DataAccessException {
         DataAccess dataAccess = new MemoryDataAccess();
         dataAccess.getAuth(logoutRequest.authtoken());
         dataAccess.deleteAuth(logoutRequest.authtoken());

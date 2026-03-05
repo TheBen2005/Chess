@@ -37,9 +37,10 @@ public class MemoryDataAccess implements DataAccess{
 
     }
 
-    public void getAuth(String authToken) throws DataAccessException{
+    public AuthData getAuth(String authToken) throws DataAccessException{
         for(AuthData auth : authList){
-            if(auth.equals(authToken)){
+            String Token = auth.authToken();
+            if(Token.equals(authToken)){
                 return auth;
             }
         }
@@ -52,12 +53,13 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     public void createGame(GameData gameData){
+        gameList.add(gameData);
 
     }
 
-    public void getGame(int gameId) throws DataAccessException{
+    public GameData getGame(int gameId) throws DataAccessException{
         for(GameData game : gameList){
-            if(game.gameID == gameId){
+            if(game.gameID() == gameId){
                 return game;
             }
         }
@@ -66,6 +68,7 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     public void updateGame(GameData gameData){
+
 
     }
 
