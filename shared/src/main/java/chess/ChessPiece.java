@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.ArrayList;
 
@@ -72,14 +71,14 @@ public class ChessPiece {
         //ChessPiece piece = board.getPiece(myPosition);
         PieceMovesCalculator calculator = new PieceMovesCalculator();
         if (type == PieceType.BISHOP){
-            return calculator.BishopMovesCalculator(pieceColor, type, myPosition, board);
+            return calculator.bishopMovesCalculator(pieceColor, type, myPosition, board);
         }
         else if (type == PieceType.ROOK){
-            return calculator.RookMovesCalculator(pieceColor, type, myPosition, board);
+            return calculator.rookMovesCalculator(pieceColor, type, myPosition, board);
         }
 
-        Collection<ChessMove> bishop_moves = calculator.BishopMovesCalculator(pieceColor, type, myPosition, board);
-        Collection<ChessMove> rook_moves = calculator.RookMovesCalculator(pieceColor, type, myPosition, board);
+        Collection<ChessMove> bishop_moves = calculator.bishopMovesCalculator(pieceColor, type, myPosition, board);
+        Collection<ChessMove> rook_moves = calculator.rookMovesCalculator(pieceColor, type, myPosition, board);
         Collection<ChessMove> queen_moves = new ArrayList<>();
         queen_moves.addAll(bishop_moves);
         queen_moves.addAll(rook_moves);
@@ -89,17 +88,17 @@ public class ChessPiece {
 
         if (type == PieceType.PAWN){
             if (pieceColor == ChessGame.TeamColor.WHITE) {
-                return calculator.PawnMovesCalculatorWhite(pieceColor, type, myPosition, board);
+                return calculator.pawnMovesCalculatorWhite(pieceColor, type, myPosition, board);
             }
             else{
-                return calculator.PawnMovesCalculatorBlack(pieceColor, type, myPosition, board);
+                return calculator.pawnMovesCalculatorBlack(pieceColor, type, myPosition, board);
             }
         }
         if (type == PieceType.KING){
-            return calculator.KingMovesCalculator(pieceColor, type, myPosition, board);
+            return calculator.kingMovesCalculator(pieceColor, type, myPosition, board);
         }
         if (type == PieceType.KNIGHT){
-            return calculator.KnightMovesCalculator(pieceColor, type, myPosition, board);
+            return calculator.knightMovesCalculator(pieceColor, type, myPosition, board);
         }
 
 

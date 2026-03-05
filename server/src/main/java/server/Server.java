@@ -28,7 +28,6 @@ public class Server {
         javalin.put("/game", this::joinGameHandler);
         javalin.delete("/db", this::clearApplicationHandler);
 
-        // Register your endpoints and exception handlers here.
 
     }
 
