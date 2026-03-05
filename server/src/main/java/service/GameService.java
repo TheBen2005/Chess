@@ -60,7 +60,8 @@ public class GameService {
         if (gameData == null) {
             throw new DataAccessException("bad request");
         }
-        if((gameData.whiteUsername() != null && joinGameRequest.playerColor().equals("WHITE")) || (gameData.blackUsername() != null && joinGameRequest.playerColor().equals("BLACK"))){
+        if((gameData.whiteUsername() != null && joinGameRequest.playerColor().equals("WHITE"))
+                || (gameData.blackUsername() != null && joinGameRequest.playerColor().equals("BLACK"))){
             throw new DataAccessException("already taken");
         }
         String username = authData.username();

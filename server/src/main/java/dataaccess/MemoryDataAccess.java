@@ -39,8 +39,8 @@ public class MemoryDataAccess implements DataAccess{
 
     public AuthData getAuth(String authToken) throws DataAccessException{
         for(AuthData auth : authList){
-            String Token = auth.authToken();
-            if(Token.equals(authToken)){
+            String token = auth.authToken();
+            if(token.equals(authToken)){
                 return auth;
             }
         }
