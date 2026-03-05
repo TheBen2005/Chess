@@ -33,7 +33,7 @@ public class UserService {
             throw new DataAccessException("bad request");
         }
         UserData user = dataAccess.getUser(loginRequest.username());
-        if(user.password() != loginRequest.password()){
+        if(!user.password().equals(loginRequest.password())){
             throw new DataAccessException("unauthorized");
         }
         String token = GenerateToken.generateToken();
@@ -45,8 +45,8 @@ public class UserService {
 
     public void logout(LogoutRequest logoutRequest) throws DataAccessException {
         DataAccess dataAccess = new MemoryDataAccess();
-        dataAccess.getAuth(logoutRequest.authtoken());
-        dataAccess.deleteAuth(logoutRequest.authtoken());
+        dataAccess.getAuth(logoutRequest.authToken());
+        dataAccess.deleteAuth(logoutRequest.authToken());
 
 
     }

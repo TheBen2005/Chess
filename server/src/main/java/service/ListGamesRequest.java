@@ -1,4 +1,4 @@
 package service;
 
-public record ListGamesRequest(String authtoken) {
+public record ListGamesRequest(String authToken) {
 }

@@ -12,7 +12,7 @@ public class UserServiceTests {
     private ClearService clearService;
 
     @BeforeEach
-    public void setup(){
+    public void setup() throws DataAccessException {
         userService = new UserService();
         gameService = new GameService();
         clearService = new ClearService();
@@ -20,7 +20,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void registerSuccess(){
+    public void registerSuccess() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("Ben", "12345", "Ben email");
         RegisterResult registerResult = userService.register(registerRequest);
         Assertions.assertNotNull(registerResult.authToken());
@@ -39,7 +39,7 @@ public class UserServiceTests {
         }
     }
         @Test
-        public void loginSuccess(){
+        public void loginSuccess() throws DataAccessException {
             RegisterRequest registerRequest = new RegisterRequest("ben", "12345", "benemail");
             userService.register(registerRequest);
             LoginRequest loginRequest = new LoginRequest("ben", "12345");
@@ -59,12 +59,12 @@ public class UserServiceTests {
 
     }
     @Test
-    public void logoutSuccess(){
+    public void logoutSuccess() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("ben", "12345", "benemail");
         userService.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("ben", "12345");
         LoginResult loginResult = userService.login(loginRequest);
-        LogoutRequest logoutRequest = new LogoutRequest(loginResult.authtoken());
+        LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
         userService.logout(logoutRequest);
 
     }
@@ -81,7 +81,7 @@ public class UserServiceTests {
 
     }
     @Test
-    public void listGameSuccess(){
+    public void listGameSuccess() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("ben", "12345", "benemail");
         RegisterResult user = userService.register(registerRequest);
         ListGamesRequest request = new ListGamesRequest(user.authToken());
@@ -103,10 +103,10 @@ public class UserServiceTests {
 
     }
     @Test
-    public void createGameSuccess(){
+    public void createGameSuccess() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("Ben", "12345", "Ben email");
         RegisterResult user = userService.register(registerRequest);
-        CreateGameRequest request = new CreateGameRequest("fun game", user.authtoken());
+        CreateGameRequest request = new CreateGameRequest("fun game", user.authToken());
         CreateGamesResult result = gameService.creategame(request);
 
         Assertions.assertNotNull(result.gameId());
@@ -124,7 +124,7 @@ public class UserServiceTests {
 
     }
     @Test
-    public void joinGameSuccess(){
+    public void joinGameSuccess() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("Ben", "12345", "Ben email");
         RegisterResult user = userService.register(registerRequest);
         CreateGameRequest request = new CreateGameRequest("fun game", user.authToken());
@@ -150,7 +150,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void clearSuccess(){
+    public void clearSuccess() throws DataAccessException {
         clearService.clear();
     }
 

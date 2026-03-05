@@ -14,13 +14,13 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
-        javalin.post("/user", this::registerHandler());
-        javalin.post("/session", this::loginHandler());
-        javalin.delete("/session", this::logoutHandler());
-        javalin.get("/game", this::listGamesHandler());
-        javalin.post("/game", this::createGameHandler());
-        javalin.put("/game", this::joinGameHandler());
-        javalin.delete("/db", this::clearApplicationHandler());
+        javalin.post("/user", this::registerHandler);
+        javalin.post("/session", this::loginHandler);
+        javalin.delete("/session", this::logoutHandler);
+        javalin.get("/game", this::listGamesHandler);
+        javalin.post("/game", this::createGameHandler);
+        javalin.put("/game", this::joinGameHandler);
+        javalin.delete("/db", this::clearApplicationHandler);
 
         // Register your endpoints and exception handlers here.
 
@@ -36,12 +36,12 @@ public class Server {
             userInfo.status(200);
         }
         catch(DataAccessException dataAccessException){
-            if(dataAccessException.getMessage() == "bad request"){
-                userInfo.json(new ResultError("Error: " dataAccessException.getMessage()));
+            if(dataAccessException.getMessage().equals("bad request")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(400);
             }
-            else if(dataAccessException.getMessage() == "already taken"){
-                userInfo.json(new ResultError("Error: " dataAccessException.getMessage()));
+            else if(dataAccessException.getMessage().equals("already taken")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(403);
             }
             else{
@@ -62,12 +62,12 @@ public class Server {
             userInfo.status(200);
         }
         catch(DataAccessException dataAccessException){
-            if(dataAccessException.getMessage() == "bad request") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            if(dataAccessException.getMessage().equals("bad request")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(400);
             }
-            if(dataAccessException.getMessage() == "unauthorized") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            else if(dataAccessException.getMessage().equals("unauthorized")){
+                userInfo.json(new ResultError("Error: "+ dataAccessException.getMessage()));
                 userInfo.status(401);
             }
             else{
@@ -83,14 +83,14 @@ public class Server {
     private void logoutHandler(Context userInfo){
         try {
             UserService userService = new UserService();
-            var serializer = new Gson();
-            LogoutRequest logoutRequest = serializer.fromJson(userInfo.body(), LogoutRequest.class);
+            String authToken = userInfo.header("authorization");
+            LogoutRequest logoutRequest = new LogoutRequest(authToken);
             userService.logout(logoutRequest);
             userInfo.status(200);
         }
         catch(DataAccessException dataAccessException){
-            if(dataAccessException.getMessage() == "unauthorized") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            if(dataAccessException.getMessage().equals("unauthorized")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(401);
             }
             else{
@@ -105,14 +105,15 @@ public class Server {
         try {
             GameService gameService = new GameService();
             var serializer = new Gson();
-            ListGamesRequest listGamesRequest = serializer.fromJson(userInfo.body(), ListGamesRequest.class);
+            String authToken = userInfo.header("authorization");
+            ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
             ListGamesResult listGamesResult = gameService.listgames(listGamesRequest);
             userInfo.json(listGamesResult);
             userInfo.status(200);
         }
         catch (DataAccessException dataAccessException){
-            if(dataAccessException.getMessage() == "unauthorized") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            if(dataAccessException.getMessage().equals("unauthorized")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(401);
             }
             else{
@@ -128,17 +129,19 @@ public class Server {
             GameService gameService = new GameService();
             var serializer = new Gson();
             CreateGameRequest createGameRequest = serializer.fromJson(userInfo.body(), CreateGameRequest.class);
-            CreateGamesResult createGamesResult = gameService.creategame(createGameRequest);
+            String authToken = userInfo.header("authorization");
+            CreateGameRequest completeRequest = new CreateGameRequest(createGameRequest.gameName(), authToken);
+            CreateGamesResult createGamesResult = gameService.creategame(completeRequest);
             userInfo.json(createGamesResult);
             userInfo.status(200);
         }
         catch (DataAccessException dataAccessException) {
-            if (dataAccessException.getMessage() == "bad request") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            if (dataAccessException.getMessage().equals("bad request")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(400);
             }
-            if (dataAccessException.getMessage() == "unauthorized") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            else if (dataAccessException.getMessage().equals("unauthorized")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(401);
             } else {
                 userInfo.json(new ResultError("Error: Something is wrong"));
@@ -153,20 +156,22 @@ public class Server {
             GameService gameService = new GameService();
             var serializer = new Gson();
             JoinGameRequest joinGameRequest = serializer.fromJson(userInfo.body(), JoinGameRequest.class);
-            gameService.joingame(joinGameRequest);
+            String authToken = userInfo.header("authorization");
+            JoinGameRequest completeRequest = new JoinGameRequest(joinGameRequest.playerColor(), joinGameRequest.gameId(), authToken);
+            gameService.joingame(completeRequest);
             userInfo.status(200);
         }
         catch (DataAccessException dataAccessException) {
-            if (dataAccessException.getMessage() == "bad request") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            if (dataAccessException.getMessage().equals("bad request")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(400);
             }
-            else if (dataAccessException.getMessage() == "unauthorized") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            else if (dataAccessException.getMessage().equals("unauthorized")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(401);
             }
-            else if (dataAccessException.getMessage() == "already taken") {
-                userInfo.json(new ResultError("Error: "dataAccessException.getMessage()));
+            else if (dataAccessException.getMessage().equals("already taken")){
+                userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(403);
             }
 
@@ -188,7 +193,7 @@ public class Server {
             userInfo.status(200);
         }
         catch (DataAccessException dataAccessException){
-            userInfo.json(new ResultError("Error: " dataAccessException.getMessage()));
+            userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
             userInfo.status(500);
         }
 

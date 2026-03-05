@@ -23,7 +23,7 @@ public class MemoryDataAccess implements DataAccess{
         return null;
     }
 
-    public UserData createUser(UserData userData) throws DataAccessException{
+    public void createUser(UserData userData) throws DataAccessException{
         userList.add(userData);
 
     }
