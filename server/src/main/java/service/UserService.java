@@ -32,12 +32,12 @@ public class UserService {
     }
 
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException{
-        if(loginRequest.username() == null){
+        if(loginRequest.username() == null || loginRequest.password() == null){
             throw new DataAccessException("bad request");
         }
         UserData user = dataAccess.getUser(loginRequest.username());
         if(user == null){
-            throw new DataAccessException("bad request");
+            throw new DataAccessException("unauthorized");
         }
         if(!user.password().equals(loginRequest.password())){
             throw new DataAccessException("unauthorized");

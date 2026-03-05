@@ -7,6 +7,7 @@ import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 
 import io.javalin.http.Context;
+import io.javalin.json.JavalinGson;
 import service.*;
 
 public class Server {
@@ -15,7 +16,9 @@ public class Server {
     private DataAccess dataAccess = new MemoryDataAccess();
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        javalin = Javalin.create(config -> { config.staticFiles.add("web");
+            config.jsonMapper(new JavalinGson());
+        });
 
         javalin.post("/user", this::registerHandler);
         javalin.post("/session", this::loginHandler);
@@ -48,7 +51,6 @@ public class Server {
                 userInfo.status(403);
             }
             else{
-                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -75,7 +77,6 @@ public class Server {
                 userInfo.status(401);
             }
             else{
-                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -99,7 +100,6 @@ public class Server {
                 userInfo.status(401);
             }
             else{
-                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -123,7 +123,6 @@ public class Server {
                 userInfo.status(401);
             }
             else{
-                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -151,7 +150,6 @@ public class Server {
                 userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(401);
             } else {
-                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -165,7 +163,7 @@ public class Server {
             var serializer = new Gson();
             JoinGameRequest joinGameRequest = serializer.fromJson(userInfo.body(), JoinGameRequest.class);
             String authToken = userInfo.header("authorization");
-            JoinGameRequest completeRequest = new JoinGameRequest(joinGameRequest.playerColor(), joinGameRequest.gameId(), authToken);
+            JoinGameRequest completeRequest = new JoinGameRequest(joinGameRequest.playerColor(), joinGameRequest.gameID(), authToken);
             gameService.joingame(completeRequest);
             userInfo.status(200);
         }
@@ -184,7 +182,6 @@ public class Server {
             }
 
             else {
-                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }

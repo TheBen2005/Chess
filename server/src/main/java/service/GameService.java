@@ -32,6 +32,9 @@ public class GameService {
     }
 
     public CreateGamesResult creategame(CreateGameRequest createGamesRequest) throws DataAccessException {
+        if(createGamesRequest.gameName() == null || createGamesRequest.authToken() == null){
+            throw new DataAccessException("bad request");
+        }
         AuthData authData = dataAccess.getAuth(createGamesRequest.authToken());
         if(authData == null){
             throw new DataAccessException("unauthorized");
@@ -53,7 +56,7 @@ public class GameService {
         if(authData == null){
             throw new DataAccessException("unauthorized");
         }
-        GameData gameData = dataAccess.getGame(joinGameRequest.gameId());
+        GameData gameData = dataAccess.getGame(joinGameRequest.gameID());
         if (gameData == null) {
             throw new DataAccessException("bad request");
         }
@@ -62,6 +65,10 @@ public class GameService {
         }
         String username = authData.username();
         GameData newData;
+        if(joinGameRequest.playerColor() == null){
+            throw new DataAccessException("bad request");
+
+        }
         if(joinGameRequest.playerColor().equals("WHITE")){
             newData = new GameData(gameData.gameID(), authData.username(), gameData.blackUsername(), gameData.gameName(), gameData.game());
         }

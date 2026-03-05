@@ -1,4 +1,4 @@
 package service;
 
-public record ResultError(String errorMessage) {
+public record ResultError(String message) {
 }

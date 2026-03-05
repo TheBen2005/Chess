@@ -51,7 +51,7 @@ public class GameServiceTests {
         CreateGameRequest request = new CreateGameRequest("fun game", user.authToken());
         CreateGamesResult result = gameService.creategame(request);
 
-        Assertions.assertNotNull(result.gameId());
+        Assertions.assertNotNull(result.gameID());
     }
     @Test
     public void createGameWrongAuth(){
@@ -71,7 +71,7 @@ public class GameServiceTests {
         RegisterResult user = userService.register(registerRequest);
         CreateGameRequest request = new CreateGameRequest("fun game", user.authToken());
         CreateGamesResult game = gameService.creategame(request);
-        JoinGameRequest gameRequest = new JoinGameRequest("WHITE", game.gameId(), user.authToken());
+        JoinGameRequest gameRequest = new JoinGameRequest("WHITE", game.gameID(), user.authToken());
         gameService.joingame(gameRequest);
 
 
@@ -81,7 +81,7 @@ public class GameServiceTests {
         try {
             CreateGameRequest request = new CreateGameRequest("fun game", "hsvdhd");
             CreateGamesResult game = gameService.creategame(request);
-            JoinGameRequest gameRequest = new JoinGameRequest("white", game.gameId(), "hsvdhd");
+            JoinGameRequest gameRequest = new JoinGameRequest("white", game.gameID(), "hsvdhd");
             gameService.joingame(gameRequest);
             Assertions.fail("Exception not thrown");
         }
