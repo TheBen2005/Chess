@@ -5,11 +5,14 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 
 public class ClearService {
-    DataAccess dataAccess = new MemoryDataAccess();
+    private DataAccess dataAccess;
+
+    public ClearService(DataAccess dataAccess){
+        this.dataAccess = dataAccess;
+    }
     public void clear() throws DataAccessException {
         dataAccess.clearUsers();
         dataAccess.clearAuth();
         dataAccess.clearGames();
-
     }
 }

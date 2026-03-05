@@ -7,9 +7,13 @@ import model.AuthData;
 import model.UserData;
 
 public class UserService {
+    private DataAccess dataAccess;
+
+    public UserService(DataAccess dataAccess){
+        this.dataAccess = dataAccess;
+    }
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
-        DataAccess dataAccess = new MemoryDataAccess();
         if(registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null){
             throw new DataAccessException("bad request");
         }
@@ -28,11 +32,13 @@ public class UserService {
     }
 
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException{
-        DataAccess dataAccess = new MemoryDataAccess();
         if(loginRequest.username() == null){
             throw new DataAccessException("bad request");
         }
         UserData user = dataAccess.getUser(loginRequest.username());
+        if(user == null){
+            throw new DataAccessException("bad request");
+        }
         if(!user.password().equals(loginRequest.password())){
             throw new DataAccessException("unauthorized");
         }
@@ -44,9 +50,11 @@ public class UserService {
     }
 
     public void logout(LogoutRequest logoutRequest) throws DataAccessException {
-        DataAccess dataAccess = new MemoryDataAccess();
-        dataAccess.getAuth(logoutRequest.authToken());
-        dataAccess.deleteAuth(logoutRequest.authToken());
+        AuthData authData = dataAccess.getAuth(logoutRequest.authToken());
+        if(authData == null){
+            throw new DataAccessException("unauthorized");
+        }
+        dataAccess.deleteAuth(authData);
 
 
     }

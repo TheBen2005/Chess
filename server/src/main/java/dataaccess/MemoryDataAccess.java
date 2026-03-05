@@ -16,7 +16,7 @@ public class MemoryDataAccess implements DataAccess{
 
     public UserData getUser(String username) throws DataAccessException{
         for(UserData user : userList){
-            if(user.username() == username){
+            if(user.username().equals(username)){
                 return user;
             }
         }
@@ -32,8 +32,8 @@ public class MemoryDataAccess implements DataAccess{
         authList.add(authData);
     }
 
-    public void deleteAuth(String authToken){
-        authList.remove(authToken);
+    public void deleteAuth(AuthData authData){
+        authList.remove(authData);
 
     }
 
@@ -44,7 +44,7 @@ public class MemoryDataAccess implements DataAccess{
                 return auth;
             }
         }
-        throw new DataAccessException("unauthorized");
+        return null;
     }
 
     public List<GameData> listGames(){
@@ -67,7 +67,16 @@ public class MemoryDataAccess implements DataAccess{
 
     }
 
-    public void updateGame(GameData gameData){
+    public void updateGame(GameData gameData) throws DataAccessException{
+        int position = 0;
+        for(GameData game: gameList){
+            if(game.gameID() == gameData.gameID()){
+                gameList.set(position, gameData);
+                return;
+            }
+            position += 1;
+        }
+        throw new DataAccessException("bad request");
 
 
     }

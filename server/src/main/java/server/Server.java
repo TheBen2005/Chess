@@ -1,7 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 
 import io.javalin.http.Context;
@@ -10,6 +12,7 @@ import service.*;
 public class Server {
 
     private final Javalin javalin;
+    private DataAccess dataAccess = new MemoryDataAccess();
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -28,7 +31,7 @@ public class Server {
 
     private void registerHandler(Context userInfo){
         try {
-            UserService userService = new UserService();
+            UserService userService = new UserService(dataAccess);
             var serializer = new Gson();
             RegisterRequest registerRequest = serializer.fromJson(userInfo.body(), RegisterRequest.class);
             RegisterResult registerResult = userService.register(registerRequest);
@@ -45,6 +48,7 @@ public class Server {
                 userInfo.status(403);
             }
             else{
+                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -54,7 +58,7 @@ public class Server {
 
     private void loginHandler(Context userInfo){
         try{
-            UserService userService = new UserService();
+            UserService userService = new UserService(dataAccess);
             var serializer = new Gson();
             LoginRequest loginRequest = serializer.fromJson(userInfo.body(), LoginRequest.class);
             LoginResult loginResult = userService.login(loginRequest);
@@ -71,6 +75,7 @@ public class Server {
                 userInfo.status(401);
             }
             else{
+                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -82,7 +87,7 @@ public class Server {
 
     private void logoutHandler(Context userInfo){
         try {
-            UserService userService = new UserService();
+            UserService userService = new UserService(dataAccess);
             String authToken = userInfo.header("authorization");
             LogoutRequest logoutRequest = new LogoutRequest(authToken);
             userService.logout(logoutRequest);
@@ -94,6 +99,7 @@ public class Server {
                 userInfo.status(401);
             }
             else{
+                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -103,7 +109,7 @@ public class Server {
 
     private void listGamesHandler(Context userInfo){
         try {
-            GameService gameService = new GameService();
+            GameService gameService = new GameService(dataAccess);
             var serializer = new Gson();
             String authToken = userInfo.header("authorization");
             ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
@@ -117,6 +123,7 @@ public class Server {
                 userInfo.status(401);
             }
             else{
+                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -126,7 +133,7 @@ public class Server {
 
     private void createGameHandler(Context userInfo){
         try {
-            GameService gameService = new GameService();
+            GameService gameService = new GameService(dataAccess);
             var serializer = new Gson();
             CreateGameRequest createGameRequest = serializer.fromJson(userInfo.body(), CreateGameRequest.class);
             String authToken = userInfo.header("authorization");
@@ -144,6 +151,7 @@ public class Server {
                 userInfo.json(new ResultError("Error: " + dataAccessException.getMessage()));
                 userInfo.status(401);
             } else {
+                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -153,7 +161,7 @@ public class Server {
 
     private void joinGameHandler(Context userInfo){
         try {
-            GameService gameService = new GameService();
+            GameService gameService = new GameService(dataAccess);
             var serializer = new Gson();
             JoinGameRequest joinGameRequest = serializer.fromJson(userInfo.body(), JoinGameRequest.class);
             String authToken = userInfo.header("authorization");
@@ -176,6 +184,7 @@ public class Server {
             }
 
             else {
+                System.out.println("ERROR: " + dataAccessException.getMessage());
                 userInfo.json(new ResultError("Error: Something is wrong"));
                 userInfo.status(500);
             }
@@ -187,7 +196,7 @@ public class Server {
 
     private void clearApplicationHandler(Context userInfo){
         try {
-            ClearService clearService = new ClearService();
+            ClearService clearService = new ClearService(dataAccess);
             clearService.clear();
             userInfo.json("{}");
             userInfo.status(200);

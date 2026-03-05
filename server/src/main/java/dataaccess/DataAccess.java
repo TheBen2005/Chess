@@ -14,9 +14,9 @@ public interface DataAccess {
 
     public void createAuth(AuthData authData) throws DataAccessException;
 
-    public void deleteAuth(String authToken);
+    public void deleteAuth(AuthData authData);
 
-    public AuthData getAuth(String authtoken) throws DataAccessException;
+    public AuthData getAuth(String authToken) throws DataAccessException;
 
     public List<GameData> listGames();
 
@@ -24,7 +24,7 @@ public interface DataAccess {
 
     public GameData getGame(int gameId) throws DataAccessException;
 
-    public void updateGame(GameData gameData);
+    public void updateGame(GameData gameData) throws DataAccessException;
 
     public void clearUsers() throws DataAccessException;
 
