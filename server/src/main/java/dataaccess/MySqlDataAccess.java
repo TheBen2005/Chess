@@ -41,6 +41,10 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public void deleteAuth(AuthData authData){
+        String username = authData.username();
+        String authToken = authData.authToken();
+        var statement = "DELETE AuthData (username, authToken) VALUES(?, ?)";
+        int id = executeUpdate(statement, username, authToken);
 
     }
 
@@ -75,14 +79,19 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public void clearUsers() throws DataAccessException{
+        var statement = "DROP TABLE IF EXISTS UserData";
+        int id = executeUpdate(statement);
 
     }
 
     public void clearGames() throws DataAccessException{
-
+        var statement = "DROP TABLE IF EXISTS GameData";
+        int id = executeUpdate(statement);
     }
 
     public void clearAuth() throws DataAccessException{
+        var statement = "DROP TABLE IF EXISTS AuthData";
+        int id = executeUpdate(statement);
     }
 
 
