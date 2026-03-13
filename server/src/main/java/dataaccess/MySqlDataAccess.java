@@ -3,6 +3,7 @@ package dataaccess;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.List;
@@ -22,6 +23,12 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public void createUser(UserData userData) throws DataAccessException{
+        String username = userData.username();
+        String password = userData.password();
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        String email = userData.email();
+        var statement = "INSERT INTO UserData (username, password, email) VALUES(?, ?, ?)";
+
     }
 
     public void createAuth(AuthData authData) throws DataAccessException{
