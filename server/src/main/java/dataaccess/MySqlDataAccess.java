@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -28,10 +29,15 @@ public class MySqlDataAccess implements DataAccess {
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         String email = userData.email();
         var statement = "INSERT INTO UserData (username, password, email) VALUES(?, ?, ?)";
+        int id = executeUpdate(statement, username, hashedPassword, email);
 
     }
 
     public void createAuth(AuthData authData) throws DataAccessException{
+        String username = authData.username();
+        String authToken = authData.authToken();
+        var statement = "INSERT INTO AuthData (username, authToken) VALUES(?, ?)";
+        int id = executeUpdate(statement, username, authToken);
     }
 
     public void deleteAuth(AuthData authData){
@@ -47,6 +53,16 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public void createGame(GameData gameData){
+        int gameID = gameData.gameID();
+        String whiteUsername = gameData.whiteUsername();
+        String blackUsername = gameData.blackUsername();
+        String gameName = gameData.gameName();
+        ChessGame game = gameData.game();
+        String json = new Gson().toJson(game);
+        var statement = "INSERT INTO AuthData (gameID, whiteUsername, blackUsername, gameName, json) VALUES(?, ?, ?, ?, ?)";
+        int id = executeUpdate(statement, gameID, whiteUsername, blackUsername, gameName, json);
+
+
 
     }
 
@@ -118,6 +134,30 @@ public class MySqlDataAccess implements DataAccess {
             throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private int executeUpdate(String statement, Object... params) throws ResponseException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                for (int i = 0; i < params.length; i++) {
+                    Object param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    else if (param instanceof PetType p) ps.setString(i + 1, p.toString());
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
+
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new ResponseException(ResponseException.Code.ServerError, String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
     }
     }
