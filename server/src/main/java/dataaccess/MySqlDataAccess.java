@@ -20,7 +20,19 @@ public class MySqlDataAccess implements DataAccess {
         DatabaseManager.configureDatabase();
     }
 
-    public UserData getUser(String username) throws DataAccessException{
+    public UserData getUser(String userName) throws DataAccessException{
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username FROM UserData WHERE username=?";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(username, userName);
+                try (ResultSet rs = ps.excecuteQuery()){
+                    if (rs.next()) {
+                        return re
+                    }
+                }
+            }
+
+        }
     }
 
     public void createUser(UserData userData) throws DataAccessException{
@@ -168,5 +180,26 @@ public class MySqlDataAccess implements DataAccess {
         } catch (SQLException e) {
             throw new ResponseException(ResponseException.Code.ServerError, String.format("unable to update database: %s, %s", statement, e.getMessage()));
         }
+    }
+
+    private UserData readUserData(ResultSet rs) throws SQLException {
+        var id = rs.getInt("id");
+        var json = rs.getString("json");
+        Pet pet = new Gson().fromJson(json, Pet.class);
+        return pet.setId(id);
+    }
+
+    private AuthData readAuthDatat(ResultSet rs) throws SQLException {
+        var id = rs.getInt("id");
+        var json = rs.getString("json");
+        Pet pet = new Gson().fromJson(json, Pet.class);
+        return pet.setId(id);
+    }
+
+    private GameData readGameData(ResultSet rs) throws SQLException {
+        var id = rs.getInt("id");
+        var json = rs.getString("json");
+        Pet pet = new Gson().fromJson(json, Pet.class);
+        return pet.setId(id);
     }
     }
