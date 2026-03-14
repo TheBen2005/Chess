@@ -27,11 +27,12 @@ public class MySqlDataAccess implements DataAccess {
                 ps.setString(username, userName);
                 try (ResultSet rs = ps.excecuteQuery()){
                     if (rs.next()) {
-                        return re
+                        return readUserData(rs);
                     }
                 }
             }
-
+        } catch (Exception e){
+            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
         }
     }
 
@@ -61,6 +62,19 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public AuthData getAuth(String authToken) throws DataAccessException{
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT authtoken FROM AuthData WHERE authtoken=?";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(authtoken, authToken);
+                try (ResultSet rs = ps.excecuteQuery()){
+                    if (rs.next()) {
+                        return readGameData(rs);
+                    }
+                }
+            }
+        } catch (Exception e){
+            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
 
     }
 
@@ -83,6 +97,20 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public GameData getGame(int gameId) throws DataAccessException{
+
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id FROM GameData WHERE id=?";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(id, gameId);
+                try (ResultSet rs = ps.excecuteQuery()){
+                    if (rs.next()) {
+                        return readUserData(rs);
+                    }
+                }
+            }
+        } catch (Exception e){
+            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
 
     }
 
@@ -126,7 +154,7 @@ public class MySqlDataAccess implements DataAccess {
             
             CREATE TABLE IF NOT EXISTS AuthData(
             username varchar(256) NOT NULL PRIMARY KEY
-            authToken varchar(256) NOT NULL 
+            authtoken varchar(256) NOT NULL 
             )
             
     
@@ -183,23 +211,26 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     private UserData readUserData(ResultSet rs) throws SQLException {
-        var id = rs.getInt("id");
-        var json = rs.getString("json");
-        Pet pet = new Gson().fromJson(json, Pet.class);
-        return pet.setId(id);
+        String username = rs.getString("username");
+        String password = rs.getString("password");
+        String email = rs.getString("email");
+        UserData userData = new UserData(username, password, email);
+        return userData;
+
     }
 
-    private AuthData readAuthDatat(ResultSet rs) throws SQLException {
-        var id = rs.getInt("id");
-        var json = rs.getString("json");
-        Pet pet = new Gson().fromJson(json, Pet.class);
-        return pet.setId(id);
+    private AuthData readAuthData(ResultSet rs) throws SQLException {
+        String authToken = rs.getString("authToken");
+        String username = rs.getString("username");
     }
 
     private GameData readGameData(ResultSet rs) throws SQLException {
-        var id = rs.getInt("id");
-        var json = rs.getString("json");
-        Pet pet = new Gson().fromJson(json, Pet.class);
-        return pet.setId(id);
+        int gameID = rs.getInt("gameID");
+        String whiteUsername = rs.getString("whiteUsername");
+        String blackUsername = rs.getString("blackUsername");
+        String gameName = rs.getString("gameName");
+        String json = rs.getString("game");
+        ChessGame game = new Gson().fromJson(json, ChessGame.class);
+        GameData gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
     }
     }
