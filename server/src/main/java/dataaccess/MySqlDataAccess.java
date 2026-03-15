@@ -7,6 +7,7 @@ import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -79,6 +80,20 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public List<GameData> listGames(){
+        List<GameData> gameList = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM GameData";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                try (ResultSet rs = ps.excecuteQuery()){
+                    while (rs.next()) {
+                        gameList.add(readGameData(rs));
+                    }
+                }
+            }
+        } catch (Exception e){
+            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return gameList;
 
     }
 
@@ -115,6 +130,17 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public void updateGame(GameData gameData) throws DataAccessException{
+        var statement = "Update Games SET whiteUsername=?, blackUsername=?, gameName=?, game=?, WHERE GameID=?";
+        int gameID = gameData.gameID();
+        String whiteUsername = gameData.whiteUsername();
+        String blackUsername = gameData.blackUsername();
+        String gameName = gameData.gameName();
+        ChessGame game = gameData.game();
+        String json = new Gson().toJson(game);
+        int id = executeUpdate(statement, whiteUsername, blackUsername, gameName, json, gameIS);
+
+
+
 
     }
 
