@@ -5,7 +5,7 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.UserData;
-
+import org.mindrot.jbcrypt.BCrypt;
 public class UserService {
     private DataAccess dataAccess;
 
@@ -39,7 +39,7 @@ public class UserService {
         if(user == null){
             throw new DataAccessException("unauthorized");
         }
-        if(!user.password().equals(loginRequest.password())){
+        if(!BCrypt.checkpw(loginRequest.password(), user.password())){
             throw new DataAccessException("unauthorized");
         }
         String token = GenerateToken.generateToken();
@@ -48,7 +48,6 @@ public class UserService {
         LoginResult loginResult = new LoginResult(loginRequest.username(), token);
         return loginResult;
     }
-
     public void logout(LogoutRequest logoutRequest) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(logoutRequest.authToken());
         if(authData == null){

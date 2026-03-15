@@ -3,6 +3,7 @@ package dataaccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,12 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     public void createUser(UserData userData) throws DataAccessException{
-        userList.add(userData);
+        String username = userData.username();
+        String password = userData.password();
+        String email = userData.email();
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        UserData newUserData = new UserData(username, hashedPassword, email);
+        userList.add(newUserData);
 
     }
 

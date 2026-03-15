@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import io.javalin.*;
 
 import io.javalin.http.Context;
@@ -13,9 +14,17 @@ import service.*;
 public class Server {
 
     private final Javalin javalin;
-    private DataAccess dataAccess = new MemoryDataAccess();
+    private DataAccess dataAccess;
 
     public Server() {
+
+        try{
+            dataAccess = new MySqlDataAccess();
+        }
+        catch (DataAccessException e) {
+            System.out.println("FAILED TO CREATE DATA ACCESS: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         javalin = Javalin.create(config -> { config.staticFiles.add("web");
             config.jsonMapper(new JavalinGson());
         });

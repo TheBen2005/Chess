@@ -23,7 +23,7 @@ public class MySqlDataAccess implements DataAccess {
 
     public UserData getUser(String userName) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username FROM UserData WHERE username=?";
+            var statement = "SELECT * FROM UserData WHERE username=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, userName);
                 try (ResultSet rs = ps.executeQuery()){
@@ -51,21 +51,20 @@ public class MySqlDataAccess implements DataAccess {
     public void createAuth(AuthData authData) throws DataAccessException{
         String username = authData.username();
         String authToken = authData.authToken();
-        var statement = "INSERT INTO AuthData (username, authToken) VALUES(?, ?)";
+        var statement = "INSERT INTO AuthData (username, authtoken) VALUES(?, ?)";
         int id = executeUpdate(statement, username, authToken);
     }
 
     public void deleteAuth(AuthData authData) throws DataAccessException{
-        String username = authData.username();
         String authToken = authData.authToken();
-        var statement = "DELETE AuthData (username, authToken) VALUES(?, ?)";
-        int id = executeUpdate(statement, username, authToken);
+        var statement = "DELETE FROM AuthData WHERE authtoken=?";
+        int id = executeUpdate(statement, authToken);
 
     }
 
     public AuthData getAuth(String authToken) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT authtoken FROM AuthData WHERE authtoken=?";
+            var statement = "SELECT * FROM AuthData WHERE authtoken=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, authToken);
                 try (ResultSet rs = ps.executeQuery()){
@@ -75,6 +74,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e){
+            System.out.println("getAuth error: " + e.getMessage());
             throw new DataAccessException("unauthorized");
         }
         return null;
@@ -104,10 +104,10 @@ public class MySqlDataAccess implements DataAccess {
         String whiteUsername = gameData.whiteUsername();
         String blackUsername = gameData.blackUsername();
         String gameName = gameData.gameName();
-        ChessGame game = gameData.game();
-        String json = new Gson().toJson(game);
-        var statement = "INSERT INTO AuthData (gameID, whiteUsername, blackUsername, gameName, json) VALUES(?, ?, ?, ?, ?)";
-        int id = executeUpdate(statement, gameID, whiteUsername, blackUsername, gameName, json);
+        ChessGame gameObject = gameData.game();
+        String game = new Gson().toJson(gameObject);
+        var statement = "INSERT INTO GameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES(?, ?, ?, ?, ?)";
+        int id = executeUpdate(statement, gameID, whiteUsername, blackUsername, gameName, game);
 
 
 
@@ -116,7 +116,7 @@ public class MySqlDataAccess implements DataAccess {
     public GameData getGame(int gameId) throws DataAccessException{
 
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT id FROM GameData WHERE id=?";
+            var statement = "SELECT * FROM GameData WHERE gameID=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setInt(1, gameId);
                 try (ResultSet rs = ps.executeQuery()){
@@ -133,7 +133,7 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public void updateGame(GameData gameData) throws DataAccessException{
-        var statement = "Update Games SET whiteUsername=?, blackUsername=?, gameName=?, game=?, WHERE GameID=?";
+        var statement = "Update GameData SET whiteUsername=?, blackUsername=?, gameName=?, game=? WHERE gameID=?";
         int gameID = gameData.gameID();
         String whiteUsername = gameData.whiteUsername();
         String blackUsername = gameData.blackUsername();
@@ -148,18 +148,18 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     public void clearUsers() throws DataAccessException{
-        var statement = "DROP TABLE IF EXISTS UserData";
+        var statement = "TRUNCATE TABLE UserData";
         int id = executeUpdate(statement);
 
     }
 
     public void clearGames() throws DataAccessException{
-        var statement = "DROP TABLE IF EXISTS GameData";
+        var statement = "TRUNCATE TABLE GameData";
         int id = executeUpdate(statement);
     }
 
     public void clearAuth() throws DataAccessException{
-        var statement = "DROP TABLE IF EXISTS AuthData";
+        var statement = "TRUNCATE TABLE AuthData";
         int id = executeUpdate(statement);
     }
 
@@ -168,39 +168,31 @@ public class MySqlDataAccess implements DataAccess {
             """
             
             CREATE TABLE IF NOT EXISTS UserData(
-            username varchar(256) NOT NULL PRIMARY KEY
-            password varchar(256) NOT NULL
+            username varchar(256) NOT NULL PRIMARY KEY,
+            password varchar(256) NOT NULL,
             email varchar(256) NOT NULL
             )
-            
-            CREATE TABLE IF NOT EXISTS GameData(
-            id Int GameID NOT NULL PRIMARY KEY
-            whiteUsername varchar(256) NOT NULL 
-            blackUsername varchar(256) NOT NULL
-            gameName varchar(256) NOT NULL
-            game varchar(256) NOT NULL
-            )
-            
-            CREATE TABLE IF NOT EXISTS AuthData(
-            username varchar(256) NOT NULL PRIMARY KEY
-            authtoken varchar(256) NOT NULL 
-            )
-            
-    
-            CREATE TABLE IF NOT EXISTS  pet (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `name` varchar(256) NOT NULL,
-              `type` ENUM('CAT', 'DOG', 'FISH', 'FROG', 'ROCK') DEFAULT 'CAT',
-              `json` TEXT DEFAULT NULL,
-              PRIMARY KEY (`id`),
-              INDEX(type),
-              INDEX(name)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """,
             """
+            CREATE TABLE IF NOT EXISTS GameData(
+            gameID int NOT NULL PRIMARY KEY,
+            whiteUsername varchar(256),
+            blackUsername varchar(256),
+            gameName varchar(256) NOT NULL,
+            game TEXT NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS AuthData(
+            username varchar(256) NOT NULL,
+            authtoken varchar(256) NOT NULL PRIMARY KEY
+            )
+            """
+
     };
 
 
-    private void configureDatabase() throws DataAccessException, DataAccessException {
+    private void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
             for (String statement : createStatements) {
@@ -209,6 +201,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException ex) {
+            System.out.println("SQL Error: " + ex.getMessage());
             throw new DataAccessException("can't configure database");
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
@@ -248,7 +241,7 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     private AuthData readAuthData(ResultSet rs) throws SQLException {
-        String authToken = rs.getString("authToken");
+        String authToken = rs.getString("authtoken");
         String username = rs.getString("username");
         AuthData authData = new AuthData(authToken, username);
         return authData;
