@@ -33,7 +33,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e){
-            throw new DataAccessException("unauthorized");
+            throw new DataAccessException(e.getMessage());
         }
         return null;
     }
@@ -74,8 +74,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e){
-            System.out.println("getAuth error: " + e.getMessage());
-            throw new DataAccessException("unauthorized");
+            throw new DataAccessException(e.getMessage());
         }
         return null;
 
@@ -93,7 +92,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e){
-            throw new DataAccessException("unauthorized");
+            throw new DataAccessException(e.getMessage());
         }
         return gameList;
 
@@ -126,7 +125,7 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (Exception e){
-            throw new DataAccessException("unable to read data");
+            throw new DataAccessException(e.getMessage());
         }
         return null;
 
