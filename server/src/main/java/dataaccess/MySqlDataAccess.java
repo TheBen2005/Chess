@@ -2,7 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import exception.ResponseException;
+import dataaccess.DataAccessException;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -17,24 +17,25 @@ import static java.sql.Types.NULL;
 public class MySqlDataAccess implements DataAccess {
 
 
-    public MySqlDataAccess() throws ResponseException {
-        DatabaseManager.configureDatabase();
+    public MySqlDataAccess() throws DataAccessException {
+        configureDatabase();
     }
 
     public UserData getUser(String userName) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username FROM UserData WHERE username=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
-                ps.setString(username, userName);
-                try (ResultSet rs = ps.excecuteQuery()){
+                ps.setString(1, userName);
+                try (ResultSet rs = ps.executeQuery()){
                     if (rs.next()) {
                         return readUserData(rs);
                     }
                 }
             }
         } catch (Exception e){
-            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessException("unauthorized");
         }
+        return null;
     }
 
     public void createUser(UserData userData) throws DataAccessException{
@@ -54,7 +55,7 @@ public class MySqlDataAccess implements DataAccess {
         int id = executeUpdate(statement, username, authToken);
     }
 
-    public void deleteAuth(AuthData authData){
+    public void deleteAuth(AuthData authData) throws DataAccessException{
         String username = authData.username();
         String authToken = authData.authToken();
         var statement = "DELETE AuthData (username, authToken) VALUES(?, ?)";
@@ -66,38 +67,39 @@ public class MySqlDataAccess implements DataAccess {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT authtoken FROM AuthData WHERE authtoken=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
-                ps.setString(authtoken, authToken);
-                try (ResultSet rs = ps.excecuteQuery()){
+                ps.setString(1, authToken);
+                try (ResultSet rs = ps.executeQuery()){
                     if (rs.next()) {
-                        return readGameData(rs);
+                        return readAuthData(rs);
                     }
                 }
             }
         } catch (Exception e){
-            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessException("unauthorized");
         }
+        return null;
 
     }
 
-    public List<GameData> listGames(){
+    public List<GameData> listGames() throws DataAccessException{
         List<GameData> gameList = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM GameData";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
-                try (ResultSet rs = ps.excecuteQuery()){
+                try (ResultSet rs = ps.executeQuery()){
                     while (rs.next()) {
                         gameList.add(readGameData(rs));
                     }
                 }
             }
         } catch (Exception e){
-            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessException("unauthorized");
         }
         return gameList;
 
     }
 
-    public void createGame(GameData gameData){
+    public void createGame(GameData gameData) throws DataAccessException{
         int gameID = gameData.gameID();
         String whiteUsername = gameData.whiteUsername();
         String blackUsername = gameData.blackUsername();
@@ -116,16 +118,17 @@ public class MySqlDataAccess implements DataAccess {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT id FROM GameData WHERE id=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
-                ps.setString(id, gameId);
-                try (ResultSet rs = ps.excecuteQuery()){
+                ps.setInt(1, gameId);
+                try (ResultSet rs = ps.executeQuery()){
                     if (rs.next()) {
-                        return readUserData(rs);
+                        return readGameData(rs);
                     }
                 }
             }
         } catch (Exception e){
-            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to read data: %s", e.getMessage()));
+            throw new DataAccessException("unable to read data");
         }
+        return null;
 
     }
 
@@ -137,7 +140,7 @@ public class MySqlDataAccess implements DataAccess {
         String gameName = gameData.gameName();
         ChessGame game = gameData.game();
         String json = new Gson().toJson(game);
-        int id = executeUpdate(statement, whiteUsername, blackUsername, gameName, json, gameIS);
+        int id = executeUpdate(statement, whiteUsername, blackUsername, gameName, json, gameID);
 
 
 
@@ -197,7 +200,7 @@ public class MySqlDataAccess implements DataAccess {
     };
 
 
-    private void configureDatabase() throws ResponseException, DataAccessException {
+    private void configureDatabase() throws DataAccessException, DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
             for (String statement : createStatements) {
@@ -206,20 +209,19 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new DataAccessException("can't configure database");
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private int executeUpdate(String statement, Object... params) throws ResponseException {
+    private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++) {
                     Object param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
                     else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof PetType p) ps.setString(i + 1, p.toString());
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
@@ -232,7 +234,7 @@ public class MySqlDataAccess implements DataAccess {
                 return 0;
             }
         } catch (SQLException e) {
-            throw new ResponseException(ResponseException.Code.ServerError, String.format("unable to update database: %s, %s", statement, e.getMessage()));
+            throw new DataAccessException("can't update database");
         }
     }
 
@@ -248,6 +250,9 @@ public class MySqlDataAccess implements DataAccess {
     private AuthData readAuthData(ResultSet rs) throws SQLException {
         String authToken = rs.getString("authToken");
         String username = rs.getString("username");
+        AuthData authData = new AuthData(authToken, username);
+        return authData;
+
     }
 
     private GameData readGameData(ResultSet rs) throws SQLException {
@@ -258,5 +263,6 @@ public class MySqlDataAccess implements DataAccess {
         String json = rs.getString("game");
         ChessGame game = new Gson().fromJson(json, ChessGame.class);
         GameData gameData = new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+        return gameData;
     }
     }
