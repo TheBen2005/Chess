@@ -46,7 +46,9 @@ public class DAOTests {
             dataAccess.createUser(userData);
             String username = "david";
             UserData user = dataAccess.getUser(username);
+            Assertions.assertNull(user);
         } catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
     }
@@ -54,6 +56,8 @@ public class DAOTests {
     public void createUserSuccess() throws DataAccessException {
         UserData userData = new UserData("ben", "12345", "ben email");
         dataAccess.createUser(userData);
+        UserData user = dataAccess.getUser("ben");
+        Assertions.assertNotNull(user);
     }
 
     @Test
@@ -63,7 +67,9 @@ public class DAOTests {
             dataAccess.createUser(userData);
             UserData userDataSame = new UserData("ben", "12345", "ben email");
             dataAccess.createUser(userDataSame);
+            Assertions.fail("should have thrown an exception");
         } catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
 
@@ -72,6 +78,8 @@ public class DAOTests {
     public void createAuthSuccess() throws DataAccessException {
         AuthData authData = new AuthData("token", "ben");
         dataAccess.createAuth(authData);
+        AuthData auth = dataAccess.getAuth("token");
+        Assertions.assertNotNull(auth);
     }
     @Test
     public void createAuthFailure() throws DataAccessException {
@@ -80,7 +88,9 @@ public class DAOTests {
             dataAccess.createAuth(authData);
             AuthData authDataSame = new AuthData("token", "ben");
             dataAccess.createAuth(authDataSame);
+            Assertions.fail("should have thrown an exception");
         } catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
 
@@ -90,6 +100,8 @@ public class DAOTests {
         AuthData authData = new AuthData("token", "ben");
         dataAccess.createAuth(authData);
         dataAccess.deleteAuth(authData);
+        AuthData auth = dataAccess.getAuth("token");
+        Assertions.assertNull(auth);
 
     }
 
@@ -100,8 +112,11 @@ public class DAOTests {
             dataAccess.createAuth(authData);
             AuthData authSecond = new AuthData("tok", "david");
             dataAccess.deleteAuth(authSecond);
+            AuthData authDataOriginal = dataAccess.getAuth("token");
+            Assertions.assertNotNull(authDataOriginal);
         }
         catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
 
@@ -123,7 +138,9 @@ public class DAOTests {
             dataAccess.createAuth(authData);
             String authToken = "david";
             AuthData user = dataAccess.getAuth(authToken);
+            Assertions.assertNull(user);
         } catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
     }
@@ -134,16 +151,18 @@ public class DAOTests {
         dataAccess.createUser(userData);
         ChessGame game = new ChessGame();
         GameData gameData = new GameData(12, userData.username(), "john", "fungame", game);
+        dataAccess.createGame(gameData);
         List<GameData> gamelist = dataAccess.listGames();
-        Assertions.assertNotNull(gamelist);
+        Assertions.assertEquals(1, gamelist.size());
     }
     @Test
     public void listGamesFailure() throws DataAccessException {
         try{
             List<GameData> games = dataAccess.listGames();
-            Assertions.assertNotNull(games);
+            Assertions.assertEquals(0, games.size());
         }
         catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
     }
@@ -152,6 +171,9 @@ public class DAOTests {
         ChessGame game = new ChessGame();
         GameData gameData = new GameData(12, "ben", "david", "game", game);
         dataAccess.createGame(gameData);
+        int gameIdTwo = 12;
+        GameData gameDataTwo = dataAccess.getGame(gameIdTwo);
+        Assertions.assertNotNull(gameDataTwo);
     }
 
     @Test
@@ -162,7 +184,9 @@ public class DAOTests {
             dataAccess.createGame(gameData);
             GameData gameDataSame = new GameData(12, "ben", "david", "game", game);
             dataAccess.createGame(gameDataSame);
+            Assertions.fail("exception should have been thrown");
         } catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
 
@@ -188,7 +212,9 @@ public class DAOTests {
             dataAccess.createGame(gameData);
             int gameId = 14;
             GameData gameTwo = dataAccess.getGame(gameId);
+            Assertions.assertNull(gameTwo);
         } catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
     }
@@ -200,6 +226,10 @@ public class DAOTests {
         dataAccess.createGame(gameData);
         GameData gameDataTwo = new GameData(12, "ben", "John", "game", game);
         dataAccess.updateGame(gameDataTwo);
+        int gameId = 12;
+        GameData gameDataThree = dataAccess.getGame(gameId);
+        String blackUsername = gameDataThree.blackUsername();
+        Assertions.assertEquals("John", blackUsername);
     }
 
     @Test
@@ -208,9 +238,12 @@ public class DAOTests {
             ChessGame game = new ChessGame();
             GameData gameData = new GameData(12, "ben", "david", "game", game);
             dataAccess.updateGame(gameData);
-            Assertions.fail("exception not thrown");
+            int gameId = 12;
+            GameData gameDataTwo = dataAccess.getGame(gameId);
+            Assertions.assertNull(gameDataTwo);
         }
         catch (DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
 
         }
 
