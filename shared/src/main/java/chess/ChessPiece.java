@@ -77,13 +77,13 @@ public class ChessPiece {
             return calculator.rookMovesCalculator(pieceColor, type, myPosition, board);
         }
 
-        Collection<ChessMove> bishop_moves = calculator.bishopMovesCalculator(pieceColor, type, myPosition, board);
-        Collection<ChessMove> rook_moves = calculator.rookMovesCalculator(pieceColor, type, myPosition, board);
-        Collection<ChessMove> queen_moves = new ArrayList<>();
-        queen_moves.addAll(bishop_moves);
-        queen_moves.addAll(rook_moves);
+        Collection<ChessMove> bishopMoves = calculator.bishopMovesCalculator(pieceColor, type, myPosition, board);
+        Collection<ChessMove> rookMoves = calculator.rookMovesCalculator(pieceColor, type, myPosition, board);
+        Collection<ChessMove> queenMoves = new ArrayList<>();
+        queenMoves.addAll(bishopMoves);
+        queenMoves.addAll(rookMoves);
         if (type == PieceType.QUEEN){
-            return queen_moves;
+            return queenMoves;
         }
 
         if (type == PieceType.PAWN){
