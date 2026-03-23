@@ -30,6 +30,9 @@ public class ServerFacade {
     }
 
     public LoginResult login(LoginRequest request){
+        var build = buildRequest("POST", "/session", request);
+        var response = sendRequest(build);
+        return handleResponse(response, LoginResult.class);
 
     }
 
@@ -57,9 +60,55 @@ public class ServerFacade {
 
     }
 
+    private HttpRequest buildRequest(String method, String path, Object body) {
+        var request = HttpRequest.newBuilder();
+                .uri(URI.create(serverUrl + path));
+                .method(method, makeRequestBody(body));
+        if(body != null) {
+            request.setHeader("Content-Type", "application/json");
+        }
+        return request.build();
+    }
 
+    private BodyPublisher makeRequestBody(Object request){
+        if (request != null){
+            return BodyPublishers.ofString(new Gson().toJson(request));
+        }
+        else{
+            return BodyPublishers.noBody();
+        }
+    }
 
+    private HttpResponse<String> sendRequest(HttpRequest request) throws DataAccessException{
+        try{
+            return client.send(request, BodyHandlers.ofString());
+        } catch (Exception ex){
+            throw new DataAccessException(ex.getMessage());
+        }
 
+    }
+
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws DataAccessException{
+        var status = response.statusCode();
+        if (!isSuccessful(status)){
+            var body = response.body();
+            if (body != null){
+                throw new DataAccessException.fromjson(body);
+            }
+
+            throw new DataAccessException(DataAccessException.fromHttpStatusCode(status), "other failure: " + status);
+
+        }
+        if (responseClass != null) {
+            return new Gson().fromJson(response.body(), responseClass);
+        }
+
+        return null;
+    }
+
+    private boolean isSuccessful(int status) {
+        return status / 100 == 2;
+    }
 
 
 }
