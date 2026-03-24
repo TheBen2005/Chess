@@ -23,6 +23,7 @@ public class ServerFacade {
 
     public void help(){
 
+
     }
 
     public void quit(){
@@ -37,26 +38,44 @@ public class ServerFacade {
     }
 
     public RegisterResult register(RegisterRequest request){
+        var build = buildRequest("POST", "/user", request);
+        var response = sendRequest(build);
+        return handleResponse(response, RegisterResult.class);
 
     }
 
+
     public void logout(LogoutRequest request){
+        var build = buildRequest("DELETE", "/session", request);
+        var response = sendRequest(build);
+        return handleResponse(response, LogoutResult.class);
 
     }
 
     public CreateGameResult createGame(CreateGameRequest request){
+        var build = buildRequest("POST", "/game", request);
+        var response = sendRequest(build);
+        return handleResponse(response, CreateGameResult.class);
 
     }
 
     public ListGamesResult listGames(ListGamesRequest request){
+        var build = buildRequest("GET", "/game", request);
+        var response = sendRequest(build);
+        return handleResponse(response, ListGamesResult.class);
 
     }
 
     public void playGame(JoinGameRequest request){
+        var build = buildRequest("PUT", "/game", request);
+        sendRequest(build);
+
 
     }
 
     public void observeGame(){
+        var build = buildRequest("PUT", "/game", request);
+        sendRequest(build);
 
     }
 
