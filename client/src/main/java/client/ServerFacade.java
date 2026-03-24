@@ -1,11 +1,11 @@
 package client;
 
-package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
+import service.*;
 
 import java.net.*;
 import java.net.http.*;
@@ -21,23 +21,14 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public void help(){
-
-
-    }
-
-    public void quit(){
-
-    }
-
-    public LoginResult login(LoginRequest request){
+    public LoginResult login(LoginRequest request) throws DataAccessException {
         var build = buildRequest("POST", "/session", request);
         var response = sendRequest(build);
         return handleResponse(response, LoginResult.class);
 
     }
 
-    public RegisterResult register(RegisterRequest request){
+    public RegisterResult register(RegisterRequest request) throws DataAccessException {
         var build = buildRequest("POST", "/user", request);
         var response = sendRequest(build);
         return handleResponse(response, RegisterResult.class);
@@ -45,36 +36,34 @@ public class ServerFacade {
     }
 
 
-    public void logout(LogoutRequest request){
+    public void logout(LogoutRequest request) throws DataAccessException {
         var build = buildRequest("DELETE", "/session", request);
-        var response = sendRequest(build);
-        return handleResponse(response, LogoutResult.class);
-
+        sendRequest(build);
     }
 
-    public CreateGameResult createGame(CreateGameRequest request){
+    public CreateGamesResult createGame(CreateGameRequest request) throws DataAccessException{
         var build = buildRequest("POST", "/game", request);
         var response = sendRequest(build);
-        return handleResponse(response, CreateGameResult.class);
+        return handleResponse(response, CreateGamesResult.class);
 
     }
 
-    public ListGamesResult listGames(ListGamesRequest request){
+    public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException{
         var build = buildRequest("GET", "/game", request);
         var response = sendRequest(build);
         return handleResponse(response, ListGamesResult.class);
 
     }
 
-    public void playGame(JoinGameRequest request){
+    public void joinGame(JoinGameRequest request) throws DataAccessException{
         var build = buildRequest("PUT", "/game", request);
         sendRequest(build);
 
 
     }
 
-    public void observeGame(){
-        var build = buildRequest("PUT", "/game", request);
+    public void clear() throws DataAccessException{
+        var build = buildRequest("DELETE", "/db", null);
         sendRequest(build);
 
     }
