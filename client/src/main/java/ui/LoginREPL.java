@@ -31,9 +31,61 @@ public class LoginRepl implements NotificationHandler {
     }
 
     public void run() {
-        System.out.println(LOGO + )
+        System.out.println(LOGO + "Welcome to Ben's Chess Server. Sign in to start.");
         System.out.print(help());
 
+        Scanner scanner = new Scanner(System.in);
+        var result = "";
+        while (!result.equals("quit")) {
+            printPrompt();
+            String line = scanner.nextline();
+            try {
+                result = eval(line);
+                System.out.print(BLUE + result);
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(msg);
+            }
+        }
+        System.out.println();
+
+    }
+
+    public String eval(String input){
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "help" -> help();
+                case "quit" -> quit();
+                case "login" -> login(params);
+                case "register" -> register(params);
+                default -> help();
+            };
+        } catch (ResponseException ex) {
+            return ex.getMessage();
+        }
+    }
+
+    }
+    public String login(String... params) {
+
+    }
+
+    public String quit() {
+
+    }
+
+    public String register(String... params) {
+
+    }
+
+
+
+
+    private void printPrompt() {
+        System.out.println("\n" + RESET + ">>> " + GREEN);
     }
     public String help() {
         if(state == State.PRELOGIN){
