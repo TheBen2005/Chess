@@ -21,6 +21,7 @@ public class LoginRepl implements NotificationHandler {
     private final WebSocketFacade ws;
     private State state = State.PRELOGIN;
     private String authtoken = "";
+    private List<GameData> gamelist;
 
     public PetClient(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -108,7 +109,7 @@ public class LoginRepl implements NotificationHandler {
 
     }
 
-    public String logout(authtoken) {
+    public String logout() {
         try {
             LogoutRequest logoutRequest = new LogoutRequest(authtoken);
             server.logout(logoutRequest);
@@ -137,11 +138,12 @@ public class LoginRepl implements NotificationHandler {
     public String listGames() {
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
-            games = server.listGames(logoutRequest);
+            games = server.listGames(listGamesRequest);
             int game_num = 1;
             var result = new Stringbuilder();
             for(GameData game: games) {
                 result.append(String.format("%d. %s | White: %s | Black: %s\n", game_num, GameData.gameName(), GameData.whiteUsername(), GameData.blackUsername()));
+
             }
             state = state.PRELOGIN;
             authtoken = "";
@@ -150,10 +152,35 @@ public class LoginRepl implements NotificationHandler {
         catch(DataAccessException dataAccessException) {
             return String.format("Failed to listGames");
         }
+    }
+
+    public String playGame(String playercolor, int gameID) {
+
+        try {
+            ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
+            gameList = server.listGames(listGamesRequest);
+            int game_num = 0;
+            for (GameData game : gameList) {
+                game_num++;
+                if (game_num == gameID) {
+                    int realID = game.gameID();
+                    JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, gameID, authtoken);
+                    server.join(joinGameRequest);
+                    return String.format("You successfully joined a game");
+                }
+            }
+        }
+        catch(DataAccessException dataAccessException) {
+            return String.format("Failed to join game");
+
+        }
+
+
 
 
 
     }
+
 
 
 
