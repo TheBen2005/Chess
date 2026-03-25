@@ -164,7 +164,7 @@ public class LoginRepl implements NotificationHandler {
                 game_num++;
                 if (game_num == gameID) {
                     int realID = game.gameID();
-                    JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, gameID, authtoken);
+                    JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.join(joinGameRequest);
                     return String.format("You successfully joined a game");
                 }
@@ -181,8 +181,29 @@ public class LoginRepl implements NotificationHandler {
 
     }
 
+    public String observeGame(int gameID) {
+        try {
+            ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
+            gameList = server.listGames(listGamesRequest);
+            int game_num = 0;
+            for (GameData game : gameList) {
+                game_num++;
+                if (game_num == gameID) {
+                    int realID = game.gameID();
+                    JoinGameRequest joinGameRequest = new JoinGameRequest(null, realID, authtoken);
+                    server.join(joinGameRequest);
+                    state = state.GAMEPLAY;
+                    return String.format("You successfully joined a game");
+                }
+            }
+        }
+        catch(DataAccessException dataAccessException) {
+            return String.format("Failed to join game");
+
+        }
 
 
+    }
 
 
     private void printPrompt() {
@@ -197,6 +218,25 @@ public class LoginRepl implements NotificationHandler {
                     - help - with possible commands            
                     
                     """;
+
+        }
+        if(state == State.POSTLOGIN) {
+            return """
+                    - createGame <gamename> - a game
+                    - listGames - games
+                    - playGame <COLOR><ID> - a game
+                    - help - with possible commands
+                    - observeGame <ID> - a game  
+                    - logout - when you are done
+                    - quit - playing chess         
+                    
+                    """;
+
+        if(state == State.GAMEPLAY){
+
+
+
+
 
         }
     }
