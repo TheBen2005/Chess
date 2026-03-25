@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import model.*;
 import exception.ResponseException;
 import client.websocket.NotificationHandler;
@@ -69,7 +70,20 @@ public class LoginRepl implements NotificationHandler {
     }
 
     }
-    public String login(String... params) {
+    public String login(String name, String password) {
+        try {
+            LoginRequest loginRequest = new LoginRequest(name, password);
+            server.login(loginRequest);
+            state = state.POSTLOGIN;
+            return String.format("You signed in as %s.", name);
+        }
+        catch(DataAccessException dataAccessException) {
+            return
+
+        }
+
+
+
 
     }
 
@@ -77,7 +91,17 @@ public class LoginRepl implements NotificationHandler {
 
     }
 
-    public String register(String... params) {
+    public String register(String username, String password, String email) {
+        try {
+            RegisterRequest registerRequest = new RegisterRequest(username, password);
+            server.login(registerRequest);
+            state = state.POSTLOGIN;
+            return String.format("You signed in as %s.", username);
+        }
+        catch(DataAccessException dataAccessException) {
+            return
+
+        }
 
     }
 
