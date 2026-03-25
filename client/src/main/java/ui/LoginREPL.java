@@ -20,6 +20,7 @@ public class LoginRepl implements NotificationHandler {
     private final ServerFacade server;
     private final WebSocketFacade ws;
     private State state = State.PRELOGIN;
+    private String authtoken = "";
 
     public PetClient(String serverUrl) throws ResponseException {
         server = new ServerFacade(serverUrl);
@@ -73,7 +74,8 @@ public class LoginRepl implements NotificationHandler {
     public String login(String name, String password) {
         try {
             LoginRequest loginRequest = new LoginRequest(name, password);
-            server.login(loginRequest);
+            LoginResult loginResult = server.login(loginRequest);
+            authtoken = loginResult.authToken();
             state = state.POSTLOGIN;
             return String.format("You signed in as %s.", name);
         }
@@ -94,7 +96,8 @@ public class LoginRepl implements NotificationHandler {
     public String register(String username, String password, String email) {
         try {
             RegisterRequest registerRequest = new RegisterRequest(username, password);
-            server.login(registerRequest);
+            RegisterResult registerResult = server.login(registerRequest);
+            authtoken = LoginResult.authtoken();
             state = state.POSTLOGIN;
             return String.format("You signed in as %s.", username);
         }
@@ -102,6 +105,34 @@ public class LoginRepl implements NotificationHandler {
             return
 
         }
+
+    }
+
+    public String logout(String auth) {
+        try {
+            LogoutRequest logoutRequest = new LogoutRequest(auth);
+            server.logout(logoutRequest);
+            state = state.PRELOGIN;
+            return String.format("You successfully signed out.");
+        }
+        catch(DataAccessException dataAccessException) {
+            return
+
+        }
+
+
+    }
+    public String createGame(String gameName, String authToken) {
+        try {
+            CreateGameRequest createGameRequest = new CreateGameRequest(gameName, authToken);
+            server.createGame(createGameRequest);
+            return String.format("You successfully created a game");
+        }
+        catch(DataAccessException dataAccessException) {
+            return
+
+        }
+
 
     }
 
