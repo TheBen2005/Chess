@@ -80,7 +80,7 @@ public class LoginRepl implements NotificationHandler {
             return String.format("You signed in as %s.", name);
         }
         catch(DataAccessException dataAccessException) {
-            return
+            return String.format("Failed to login");
 
         }
 
@@ -102,36 +102,55 @@ public class LoginRepl implements NotificationHandler {
             return String.format("You signed in as %s.", username);
         }
         catch(DataAccessException dataAccessException) {
-            return
+            return String.format("Failed to register");
 
         }
 
     }
 
-    public String logout(String auth) {
+    public String logout(authtoken) {
         try {
-            LogoutRequest logoutRequest = new LogoutRequest(auth);
+            LogoutRequest logoutRequest = new LogoutRequest(authtoken);
             server.logout(logoutRequest);
             state = state.PRELOGIN;
+            authtoken = "";
             return String.format("You successfully signed out.");
         }
         catch(DataAccessException dataAccessException) {
-            return
+            return String.format("Failed to logout");
 
         }
 
 
     }
-    public String createGame(String gameName, String authToken) {
+    public String createGame(String gameName) {
         try {
-            CreateGameRequest createGameRequest = new CreateGameRequest(gameName, authToken);
+            CreateGameRequest createGameRequest = new CreateGameRequest(gameName, authtoken);
             server.createGame(createGameRequest);
             return String.format("You successfully created a game");
         }
         catch(DataAccessException dataAccessException) {
-            return
+            return String.format("Failed to create a game");
 
         }
+    }
+    public String listGames() {
+        try {
+            ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
+            games = server.listGames(logoutRequest);
+            int game_num = 1;
+            var result = new Stringbuilder();
+            for(GameData game: games) {
+                result.append(String.format("%d. %s | White: %s | Black: %s\n", game_num, GameData.gameName(), GameData.whiteUsername(), GameData.blackUsername()));
+            }
+            state = state.PRELOGIN;
+            authtoken = "";
+            return result.toString();
+        }
+        catch(DataAccessException dataAccessException) {
+            return String.format("Failed to listGames");
+        }
+
 
 
     }
