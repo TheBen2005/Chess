@@ -22,8 +22,8 @@ import service.LoginResult;
 import service.LogoutRequest;
 
 
-
-import static ui.EscapeSequences.*;
+import ui.EscapeSequences;
+import ui.EscapeSequences.*;
 
 public class LoginRepl {
     private String visitorName = null;
@@ -31,9 +31,11 @@ public class LoginRepl {
     private State state = State.PRELOGIN;
     private String authtoken = "";
     private List<GameData> gamelist;
+    private final EscapeSequences escapeSequences;
 
-    public LoginRepl(String serverUrl) throws DataAccessException {
+    public LoginRepl(String serverUrl, EscapeSequences escapeSequences) throws DataAccessException {
         server = new ServerFacade(serverUrl);
+        this.escapeSequences = escapeSequences;
     }
     public enum State {
         PRELOGIN,
@@ -104,9 +106,9 @@ public class LoginRepl {
 
     public String register(String username, String password, String email) {
         try {
-            RegisterRequest registerRequest = new RegisterRequest(username, password);
-            RegisterResult registerResult = server.login(registerRequest);
-            authtoken = LoginResult.authtoken();
+            RegisterRequest registerRequest = new RegisterRequest(username, password, email);
+            RegisterResult registerResult = server.register(registerRequest);
+            authtoken = LoginResult.authToken();
             state = state.POSTLOGIN;
             return String.format("You signed in as %s.", username);
         }
@@ -146,7 +148,7 @@ public class LoginRepl {
     public String listGames() {
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
-            games = server.listGames(listGamesRequest);
+            List<GameData> games = server.listGames(listGamesRequest);
             int game_num = 1;
             var result = new StringBuilder();
             for(GameData game: games) {
@@ -166,14 +168,14 @@ public class LoginRepl {
 
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
-            gameList = server.listGames(listGamesRequest);
+            gamelist = server.listGames(listGamesRequest);
             int game_num = 0;
-            for (GameData game : gameList) {
+            for (GameData game : gamelist) {
                 game_num++;
                 if (game_num == gameID) {
                     int realID = game.gameID();
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
-                    server.join(joinGameRequest);
+                    server.joinGame(joinGameRequest);
                     return String.format("You successfully joined a game");
                 }
             }
@@ -192,14 +194,14 @@ public class LoginRepl {
     public String observeGame(int gameID) {
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
-            gameList = server.listGames(listGamesRequest);
+            gamelist = server.listGames(listGamesRequest);
             int game_num = 0;
-            for (GameData game : gameList) {
+            for (GameData game : gamelist) {
                 game_num++;
                 if (game_num == gameID) {
                     int realID = game.gameID();
                     JoinGameRequest joinGameRequest = new JoinGameRequest(null, realID, authtoken);
-                    server.join(joinGameRequest);
+                    server.joinGame(joinGameRequest);
                     state = state.GAMEPLAY;
                     return String.format("You successfully joined a game");
                 }

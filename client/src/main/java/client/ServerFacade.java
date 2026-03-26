@@ -12,6 +12,7 @@ import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.List;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -48,7 +49,7 @@ public class ServerFacade {
 
     }
 
-    public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException{
+    public List<GameData> listGames(ListGamesRequest request) throws DataAccessException{
         var build = buildRequest("GET", "/game", request);
         var response = sendRequest(build);
         return handleResponse(response, ListGamesResult.class);
@@ -69,8 +70,8 @@ public class ServerFacade {
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
-        var request = HttpRequest.newBuilder();
-                .uri(URI.create(serverUrl + path));
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
         if(body != null) {
             request.setHeader("Content-Type", "application/json");
@@ -101,10 +102,10 @@ public class ServerFacade {
         if (!isSuccessful(status)){
             var body = response.body();
             if (body != null){
-                throw new DataAccessException.fromjson(body);
+                throw new DataAccessException("Wrong response");
             }
 
-            throw new DataAccessException(DataAccessException.fromHttpStatusCode(status), "other failure: " + status);
+            throw new DataAccessException("other failure: " + status);
 
         }
         if (responseClass != null) {
