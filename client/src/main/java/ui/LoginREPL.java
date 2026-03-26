@@ -1,31 +1,39 @@
-package ui;
+
 package client;
 
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.List;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.*;
-import exception.ResponseException;
-import client.websocket.NotificationHandler;
-import server.ServerFacade;
-import client.websocket.WebSocketFacade;
-import webSocketMessages.Notification;
+import client.ServerFacade;
+import model.GameData;
+import service.CreateGameRequest;
+import service.CreateGamesResult;
+import service.LoginRequest;
+import service.RegisterRequest;
+import service.RegisterResult;
+import service.ListGamesRequest;
+import service.ListGamesResult;
+import service.JoinGameRequest;
+import service.LoginResult;
+import service.LogoutRequest;
 
-import static client.EscapeSequences.*;
 
-public class LoginRepl implements NotificationHandler {
+
+import static ui.EscapeSequences.*;
+
+public class LoginRepl {
     private String visitorName = null;
     private final ServerFacade server;
-    private final WebSocketFacade ws;
     private State state = State.PRELOGIN;
     private String authtoken = "";
     private List<GameData> gamelist;
 
-    public PetClient(String serverUrl) throws ResponseException {
+    public LoginRepl(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, this);
     }
     public enum State {
         PRELOGIN,
@@ -41,7 +49,7 @@ public class LoginRepl implements NotificationHandler {
         var result = "";
         while (!result.equals("quit")) {
             printPrompt();
-            String line = scanner.nextline();
+            String line = scanner.nextLine();
             try {
                 result = eval(line);
                 System.out.print(BLUE + result);
@@ -66,12 +74,12 @@ public class LoginRepl implements NotificationHandler {
                 case "register" -> register(params);
                 default -> help();
             };
-        } catch (ResponseException ex) {
+        } catch (DataAccessException ex) {
             return ex.getMessage();
         }
     }
 
-    }
+
     public String login(String name, String password) {
         try {
             LoginRequest loginRequest = new LoginRequest(name, password);
@@ -140,7 +148,7 @@ public class LoginRepl implements NotificationHandler {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
             games = server.listGames(listGamesRequest);
             int game_num = 1;
-            var result = new Stringbuilder();
+            var result = new StringBuilder();
             for(GameData game: games) {
                 result.append(String.format("%d. %s | White: %s | Black: %s\n", game_num, GameData.gameName(), GameData.whiteUsername(), GameData.blackUsername()));
 
@@ -231,6 +239,7 @@ public class LoginRepl implements NotificationHandler {
                     - quit - playing chess         
                     
                     """;
+        }
 
         if(state == State.GAMEPLAY){
 
