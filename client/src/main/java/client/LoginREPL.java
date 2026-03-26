@@ -5,27 +5,21 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.List;
 
-import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import model.*;
-import client.ServerFacade;
 import model.GameData;
 import service.CreateGameRequest;
-import service.CreateGamesResult;
 import service.LoginRequest;
 import service.RegisterRequest;
 import service.RegisterResult;
 import service.ListGamesRequest;
-import service.ListGamesResult;
 import service.JoinGameRequest;
 import service.LoginResult;
 import service.LogoutRequest;
 
 
 import ui.EscapeSequences;
-import ui.EscapeSequences.*;
 
-public class LoginRepl {
+public class LoginREPL {
     private String visitorName = null;
     private final ServerFacade server;
     private State state = State.PRELOGIN;
@@ -33,7 +27,7 @@ public class LoginRepl {
     private List<GameData> gamelist;
     private final EscapeSequences escapeSequences;
 
-    public LoginRepl(String serverUrl, EscapeSequences escapeSequences) throws DataAccessException {
+    public LoginREPL(String serverUrl, EscapeSequences escapeSequences) throws DataAccessException {
         server = new ServerFacade(serverUrl);
         this.escapeSequences = escapeSequences;
     }
@@ -44,7 +38,7 @@ public class LoginRepl {
     }
 
     public void run() {
-        System.out.println(LOGO + "Welcome to Ben's Chess Server. Sign in to start.");
+        System.out.println("Welcome to Ben's Chess Server. Sign in to start.");
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
@@ -54,7 +48,7 @@ public class LoginRepl {
             String line = scanner.nextLine();
             try {
                 result = eval(line);
-                System.out.print(BLUE + result);
+                System.out.print(result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -64,8 +58,7 @@ public class LoginRepl {
 
     }
 
-    public String eval(String input){
-        try {
+    public String eval(String input) throws DataAccessException{
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
@@ -74,16 +67,21 @@ public class LoginRepl {
                 case "quit" -> quit();
                 case "login" -> login(params);
                 case "register" -> register(params);
+                case "createGame" -> createGame(params);
+                case "listGames" -> listGames();
+                case "playGame" -> playGame(params);
+                case "observeGame" -> observeGame(params);
+                case "logout" -> logout();
                 default -> help();
-            };
-        } catch (DataAccessException ex) {
-            return ex.getMessage();
-        }
+
+        };
     }
 
 
-    public String login(String name, String password) {
+    public String login(String... params) {
         try {
+            String name = params[0];
+            String password = params[1];
             LoginRequest loginRequest = new LoginRequest(name, password);
             LoginResult loginResult = server.login(loginRequest);
             authtoken = loginResult.authToken();
@@ -101,14 +99,18 @@ public class LoginRepl {
     }
 
     public String quit() {
+        return "quit";
 
     }
 
-    public String register(String username, String password, String email) {
+    public String register(String... params) {
+        String username = params[0];
+        String password = params[1];
+        String email = params[2];
         try {
             RegisterRequest registerRequest = new RegisterRequest(username, password, email);
             RegisterResult registerResult = server.register(registerRequest);
-            authtoken = LoginResult.authToken();
+            authtoken = registerResult.authToken();
             state = state.POSTLOGIN;
             return String.format("You signed in as %s.", username);
         }
@@ -134,7 +136,8 @@ public class LoginRepl {
 
 
     }
-    public String createGame(String gameName) {
+    public String createGame(String... params) {
+        String gameName = params[0];
         try {
             CreateGameRequest createGameRequest = new CreateGameRequest(gameName, authtoken);
             server.createGame(createGameRequest);
@@ -152,11 +155,9 @@ public class LoginRepl {
             int game_num = 1;
             var result = new StringBuilder();
             for(GameData game: games) {
-                result.append(String.format("%d. %s | White: %s | Black: %s\n", game_num, GameData.gameName(), GameData.whiteUsername(), GameData.blackUsername()));
+                result.append(String.format("%d. %s | White: %s | Black: %s\n", game_num, game.gameName(), game.whiteUsername(), game.blackUsername()));
 
             }
-            state = state.PRELOGIN;
-            authtoken = "";
             return result.toString();
         }
         catch(DataAccessException dataAccessException) {
@@ -164,8 +165,10 @@ public class LoginRepl {
         }
     }
 
-    public String playGame(String playercolor, int gameID) {
+    public String playGame(String... params) {
 
+        String playercolor = params[0];
+        int gameID = Integer.parseInt(params[1]);
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
             gamelist = server.listGames(listGamesRequest);
@@ -178,20 +181,24 @@ public class LoginRepl {
                     server.joinGame(joinGameRequest);
                     return String.format("You successfully joined a game");
                 }
+
+
             }
+
         }
         catch(DataAccessException dataAccessException) {
             return String.format("Failed to join game");
 
         }
 
-
+        return String.format("Failed to join game");
 
 
 
     }
 
-    public String observeGame(int gameID) {
+    public String observeGame(String... params) {
+        int gameID = Integer.parseInt(params[1]);
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
             gamelist = server.listGames(listGamesRequest);
@@ -211,13 +218,15 @@ public class LoginRepl {
             return String.format("Failed to join game");
 
         }
+        return String.format("Failed to join game");
+
 
 
     }
 
 
     private void printPrompt() {
-        System.out.println("\n" + RESET + ">>> " + GREEN);
+        System.out.println("\n" + ">>> ");
     }
     public String help() {
         if(state == State.PRELOGIN){
@@ -250,5 +259,6 @@ public class LoginRepl {
 
 
         }
+        return null;
     }
 }
