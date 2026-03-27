@@ -28,27 +28,15 @@ public class BoardDraw {
 
         drawHeaders(out);
 
-        drawTicTacToeBoard(out);
+        drawChess(out);
 
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
     private static void drawHeaders(PrintStream out) {
-        out.print(SET_BG_COLOR_BLUE);
-        out.print(SET_TEXT_COLOR_WHITE);
+        out.print(SET_BG_COLOR_DARK_GREY);
         out.print(EMPTY);
-        String[] headers = { "a", "b", "c", "d", "e", "f", "g", "h" };
-        for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
-            drawHeader(out, headers[boardCol]);
-
-            if (boardCol < BOARD_SIZE_IN_SQUARES - 1) {
-                out.print(EMPTY.repeat(LINE_WIDTH_IN_PADDED_CHARS));
-            }
-        }
-        out.print(EMPTY);
-        out.print(RESET_BG_COLOR);
-        out.println();
     }
 
     private static void drawHeader(PrintStream out, String headerText) {
@@ -69,9 +57,35 @@ public class BoardDraw {
     }
 
     private static void drawChess(PrintStream out) {
+        for(int j = 8; j >= 0; j--) {
+            for (int i = 0; i < 10; i++) {
+                if(i == 0 || i == 9) {
+                    out.print(SET_BG_COLOR_DARK_GREY);
+                    out.print(SET_TEXT_COLOR_LIGHT_GREY);
+                    String row_num = Integer.toString(j);
+                    out.print(" " + row_num + " ");
+                }
+                else{
+                    boolean color = true;
+
+                    if ((j + i) % 2 == 0) {
+                        color = false;
+                    }
+                    if (color == true) {
+                        out.print(SET_BG_COLOR_BLUE);
+                    } else {
+                        out.print(SET_BG_COLOR_WHITE);
+                    }
+                    out.print(EMPTY);
+                    }
+                }
+            out.println();
+
+            }
+
+        }
 
 
-    }
 
 
 }
