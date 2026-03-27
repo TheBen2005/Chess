@@ -28,7 +28,7 @@ public class LoginREPL {
     private List<GameData> gamelist;
 
 
-    public LoginREPL(String serverUrl, EscapeSequences escapeSequences) throws DataAccessException {
+    public LoginREPL(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
     }
     public enum State {
