@@ -3,6 +3,9 @@ package client;
 import dataaccess.DataAccessException;
 import org.junit.jupiter.api.*;
 import server.Server;
+import service.LoginRequest;
+import service.LogoutRequest;
+import service.RegisterRequest;
 
 
 public class ServerFacadeTests {
@@ -31,31 +34,79 @@ public class ServerFacadeTests {
 
     @Test
     void loginSuccess() throws Exception{
+        RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
+        facade.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("Theben", "12345");
+        var authData = facade.login(loginRequest);
+        Assertions.assertNotNull(authData.authToken());
+    }
+
+    @Test
+    void loginfailure() throws DataAccessException{
+        try{
+            RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
+            facade.register(registerRequest);
+            LoginRequest loginRequest = new LoginRequest("Theb", "1235");
+            facade.login(loginRequest);
+            Assertions.fail("should have thrown an exception");
+        }
+        catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
+        }
+
 
     }
 
     @Test
-    void loginfailure() throws Exception{
+    void registerSuccess() throws DataAccessException{
+        RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
+        var authData = facade.register(registerRequest);
+        Assertions.assertNotNull(authData.authToken());
 
     }
 
     @Test
-    void registerSuccess() throws Exception{
+    void registerfailure() throws DataAccessException{
+        try{
+            RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
+            facade.register(registerRequest);
+            RegisterRequest registerRequestTwo = new RegisterRequest("Theben", "12345", "password");
+            facade.register(registerRequestTwo);
+            Assertions.fail("should have thrown an exception");
+        }
+        catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
+        }
 
     }
 
     @Test
-    void registerfailure() throws Exception{
+    void logoutSuccess() throws DataAccessException{
+        RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
+        facade.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("Theben", "12345");
+        var authData = facade.login(loginRequest);
+        String authToken = authData.authToken();
+        LogoutRequest logoutRequest = new LogoutRequest(authToken);
+        facade.logout(logoutRequest);
+        Assertions.assertNotNull(authToken);
 
     }
 
     @Test
-    void logoutSuccess() throws Exception{
-
-    }
-
-    @Test
-    void logoutFailure() throws Exception{
+    void logoutFailure() throws DataAccessException{
+        try{
+            RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
+            facade.register(registerRequest);
+            LoginRequest loginRequest = new LoginRequest("Theben", "12345");
+            var authData = facade.login(loginRequest);
+            LogoutRequest logoutRequest = new LogoutRequest("hgsbsbs");
+            facade.logout(logoutRequest);
+            Assertions.fail("should have thrown an exception");
+        }
+        catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
+        }
 
     }
 
@@ -91,7 +142,7 @@ public class ServerFacadeTests {
 
     @Test
     void clear() throws Exception{
-
+        facade.clear();
     }
 
 
