@@ -68,10 +68,10 @@ public class LoginREPL {
                     case "quit" -> quit();
                     case "login" -> login(params);
                     case "register" -> register(params);
-                    case "createGame" -> createGame(params);
-                    case "listGames" -> listGames();
-                    case "playGame" -> playGame(params);
-                    case "observeGame" -> observeGame(params);
+                    case "creategame" -> createGame(params);
+                    case "listgames" -> listGames();
+                    case "playgame" -> playGame(params);
+                    case "observegame" -> observeGame(params);
                     case "logout" -> logout();
                     default -> help();
 
@@ -84,6 +84,9 @@ public class LoginREPL {
 
 
     public String login(String... params) {
+        if(params.length != 2){
+            return "Should have 2 arguments";
+        }
         if (state != State.PRELOGIN){
             return("Logged in already.");
         }
@@ -112,6 +115,9 @@ public class LoginREPL {
     }
 
     public String register(String... params) {
+        if(params.length != 3){
+            return "Should have 3 arguments";
+        }
         if (state != State.PRELOGIN){
             return("Registered already.");
         }
@@ -151,6 +157,9 @@ public class LoginREPL {
 
     }
     public String createGame(String... params) {
+        if(params.length != 1){
+            return "Should have 1 argument";
+        }
         if (state != State.POSTLOGIN){
             return("Not logged in yet.");
         }
@@ -188,6 +197,9 @@ public class LoginREPL {
     }
 
     public String playGame(String... params) {
+        if(params.length != 2){
+            return "Should have 2 arguments";
+        }
         if (state != State.POSTLOGIN){
             return("Not logged in yet.");
         }
@@ -205,6 +217,8 @@ public class LoginREPL {
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.joinGame(joinGameRequest);
                     state = state.GAMEPLAY;
+                    Boolean color = playercolor.equals("WHITE");
+                    ui.BoardDraw.drawBoard(color);
                     return String.format("You successfully joined a game");
                 }
 
@@ -224,6 +238,9 @@ public class LoginREPL {
     }
 
     public String observeGame(String... params) {
+        if(params.length != 1){
+            return "Should have 1 argument";
+        }
         if (state != State.POSTLOGIN){
             return("Not logged in yet.");
         }
@@ -240,6 +257,7 @@ public class LoginREPL {
                     JoinGameRequest joinGameRequest = new JoinGameRequest(null, realID, authtoken);
                     server.joinGame(joinGameRequest);
                     state = state.GAMEPLAY;
+                    ui.BoardDraw.drawBoard(true);
                     return String.format("You successfully joined a game");
                 }
             }
@@ -271,11 +289,11 @@ public class LoginREPL {
         }
         if(state == State.POSTLOGIN) {
             return """
-                    - createGame <gamename> - a game
-                    - listGames - games
-                    - playGame <COLOR><ID> - a game
+                    - creategame <gamename> - a game
+                    - listgames - games
+                    - playgame <COLOR><ID> - a game
                     - help - with possible commands
-                    - observeGame <ID> - a game  
+                    - observegame <ID> - a game  
                     - logout - when you are done
                     - quit - playing chess         
                     

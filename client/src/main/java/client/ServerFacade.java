@@ -39,7 +39,8 @@ public class ServerFacade {
 
     public void logout(LogoutRequest request) throws DataAccessException {
         var build = buildRequest("DELETE", "/session", request);
-        sendRequest(build);
+        var response = sendRequest(build);
+        handleResponse(response, null);
     }
 
     public CreateGamesResult createGame(CreateGameRequest request) throws DataAccessException{
@@ -58,7 +59,8 @@ public class ServerFacade {
 
     public void joinGame(JoinGameRequest request) throws DataAccessException{
         var build = buildRequest("PUT", "/game", request);
-        sendRequest(build);
+        var response = sendRequest(build);
+        handleResponse(response, null);
 
 
     }
