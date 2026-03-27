@@ -15,6 +15,7 @@ import service.ListGamesRequest;
 import service.JoinGameRequest;
 import service.LoginResult;
 import service.LogoutRequest;
+import service.ListGamesResult;
 
 
 import ui.EscapeSequences;
@@ -25,11 +26,10 @@ public class LoginREPL {
     private State state = State.PRELOGIN;
     private String authtoken = "";
     private List<GameData> gamelist;
-    private final EscapeSequences escapeSequences;
+
 
     public LoginREPL(String serverUrl, EscapeSequences escapeSequences) throws DataAccessException {
         server = new ServerFacade(serverUrl);
-        this.escapeSequences = escapeSequences;
     }
     public enum State {
         PRELOGIN,
@@ -58,27 +58,35 @@ public class LoginREPL {
 
     }
 
-    public String eval(String input) throws DataAccessException{
+    public String eval(String input){
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "help" -> help();
-                case "quit" -> quit();
-                case "login" -> login(params);
-                case "register" -> register(params);
-                case "createGame" -> createGame(params);
-                case "listGames" -> listGames();
-                case "playGame" -> playGame(params);
-                case "observeGame" -> observeGame(params);
-                case "logout" -> logout();
-                default -> help();
+            try {
+                return switch (cmd) {
+                    case "help" -> help();
+                    case "quit" -> quit();
+                    case "login" -> login(params);
+                    case "register" -> register(params);
+                    case "createGame" -> createGame(params);
+                    case "listGames" -> listGames();
+                    case "playGame" -> playGame(params);
+                    case "observeGame" -> observeGame(params);
+                    case "logout" -> logout();
+                    default -> help();
 
-        };
+                };
+            }
+            catch (Exception e){
+                return e.getMessage();
+            }
     }
 
 
     public String login(String... params) {
+        if (state != State.PRELOGIN){
+            return("Logged in already.");
+        }
         try {
             String name = params[0];
             String password = params[1];
@@ -104,6 +112,9 @@ public class LoginREPL {
     }
 
     public String register(String... params) {
+        if (state != State.PRELOGIN){
+            return("Registered already.");
+        }
         String username = params[0];
         String password = params[1];
         String email = params[2];
@@ -122,6 +133,9 @@ public class LoginREPL {
     }
 
     public String logout() {
+        if (state != State.POSTLOGIN){
+            return("Not logged in yet.");
+        }
         try {
             LogoutRequest logoutRequest = new LogoutRequest(authtoken);
             server.logout(logoutRequest);
@@ -137,6 +151,9 @@ public class LoginREPL {
 
     }
     public String createGame(String... params) {
+        if (state != State.POSTLOGIN){
+            return("Not logged in yet.");
+        }
         String gameName = params[0];
         try {
             CreateGameRequest createGameRequest = new CreateGameRequest(gameName, authtoken);
@@ -149,13 +166,18 @@ public class LoginREPL {
         }
     }
     public String listGames() {
+        if (state != State.POSTLOGIN){
+            return("Not logged in yet.");
+        }
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
-            List<GameData> games = server.listGames(listGamesRequest);
+            ListGamesResult listGamesResult = server.listGames(listGamesRequest);
+            List<GameData> games = listGamesResult.games();
             int game_num = 1;
             var result = new StringBuilder();
             for(GameData game: games) {
                 result.append(String.format("%d. %s | White: %s | Black: %s\n", game_num, game.gameName(), game.whiteUsername(), game.blackUsername()));
+                game_num++;
 
             }
             return result.toString();
@@ -166,12 +188,15 @@ public class LoginREPL {
     }
 
     public String playGame(String... params) {
-
+        if (state != State.POSTLOGIN){
+            return("Not logged in yet.");
+        }
         String playercolor = params[0];
         int gameID = Integer.parseInt(params[1]);
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
-            gamelist = server.listGames(listGamesRequest);
+            ListGamesResult listGamesResult = server.listGames(listGamesRequest);
+            gamelist = listGamesResult.games();
             int game_num = 0;
             for (GameData game : gamelist) {
                 game_num++;
@@ -179,6 +204,7 @@ public class LoginREPL {
                     int realID = game.gameID();
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.joinGame(joinGameRequest);
+                    state = state.GAMEPLAY;
                     return String.format("You successfully joined a game");
                 }
 
@@ -198,10 +224,14 @@ public class LoginREPL {
     }
 
     public String observeGame(String... params) {
-        int gameID = Integer.parseInt(params[1]);
+        if (state != State.POSTLOGIN){
+            return("Not logged in yet.");
+        }
+        int gameID = Integer.parseInt(params[0]);
         try {
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
-            gamelist = server.listGames(listGamesRequest);
+            ListGamesResult listGamesResult = server.listGames(listGamesRequest);
+            gamelist = listGamesResult.games();
             int game_num = 0;
             for (GameData game : gamelist) {
                 game_num++;
@@ -253,12 +283,13 @@ public class LoginREPL {
         }
 
         if(state == State.GAMEPLAY){
+            return "game";
 
 
 
 
 
         }
-        return null;
+        return "";
     }
 }

@@ -49,7 +49,7 @@ public class ServerFacade {
 
     }
 
-    public List<GameData> listGames(ListGamesRequest request) throws DataAccessException{
+    public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException{
         var build = buildRequest("GET", "/game", request);
         var response = sendRequest(build);
         return handleResponse(response, ListGamesResult.class);
