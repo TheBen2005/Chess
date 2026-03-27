@@ -76,6 +76,18 @@ public class ServerFacade {
         if(body != null) {
             request.setHeader("Content-Type", "application/json");
         }
+        if(body instanceof CreateGameRequest createGameRequest){
+            request.setHeader("authorization", createGameRequest.authToken());
+        }
+        else if(body instanceof LogoutRequest logoutRequest){
+            request.setHeader("authorization", logoutRequest.authToken());
+        }
+        else if(body instanceof ListGamesRequest listGamesRequest){
+            request.setHeader("authorization", listGamesRequest.authToken());
+        }
+        else if(body instanceof JoinGameRequest joinGameRequest){
+            request.setHeader("authorization", joinGameRequest.authToken());
+        }
         return request.build();
     }
 

@@ -119,8 +119,9 @@ public class ServerFacadeTests {
         var authData = facade.login(loginRequest);
         String authToken = authData.authToken();
         CreateGameRequest createGameRequest = new CreateGameRequest("game", authToken);
-        facade.createGame(createGameRequest);
-        Assertions.assertNotNull(authToken);
+        CreateGamesResult createGamesResult = facade.createGame(createGameRequest);
+        int gameId = createGamesResult.gameID();
+        Assertions.assertNotNull(gameId);
 
     }
 
@@ -132,6 +133,8 @@ public class ServerFacadeTests {
             LoginRequest loginRequest = new LoginRequest("Theben", "12345");
             var authData = facade.login(loginRequest);
             CreateGameRequest createGameRequest = new CreateGameRequest("game", "hsbsbsb");
+            facade.createGame(createGameRequest);
+            Assertions.fail("should have thrown an exception");
         }
         catch(DataAccessException dataAccessException){
             Assertions.assertNotNull(dataAccessException.getMessage());
@@ -149,6 +152,7 @@ public class ServerFacadeTests {
         ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
         ListGamesResult listGamesResult = facade.listGames(listGamesRequest);
         List<GameData> gameList = listGamesResult.games();
+        Assertions.assertNotNull(gameList);
 
 
     }
@@ -199,6 +203,7 @@ public class ServerFacadeTests {
             int gameId = createGamesResult.gameID();
             JoinGameRequest joinGameRequest = new JoinGameRequest("White", 6, "gdhdvd");
             facade.joinGame(joinGameRequest);
+            Assertions.fail("should have thrown an exception");
         }
         catch(DataAccessException dataAccessException){
             Assertions.assertNotNull(dataAccessException.getMessage());
@@ -208,7 +213,17 @@ public class ServerFacadeTests {
 
     @Test
     void clear() throws Exception{
+        RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
+        var authData = facade.register(registerRequest);
         facade.clear();
+        try{
+            LoginRequest loginRequest = new LoginRequest("Theben", "12345");
+            facade.login(loginRequest);
+            Assertions.fail("should have thrown an exception");
+        }
+        catch(DataAccessException dataAccessException){
+            Assertions.assertNotNull(dataAccessException.getMessage());
+        }
     }
 
 
