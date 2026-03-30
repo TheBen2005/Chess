@@ -115,7 +115,7 @@ public class ServerFacade {
         try{
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex){
-            throw new DataAccessException(ex.getMessage());
+            throw new Exception(ex.getMessage());
         }
 
     }

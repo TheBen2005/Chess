@@ -5,6 +5,15 @@ import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import service.*;
+import recordClasses.CreateGameRequest;
+import recordClasses.LoginRequest;
+import recordClasses.RegisterRequest;
+import recordClasses.RegisterResult;
+import recordClasses.ListGamesRequest;
+import recordClasses.JoinGameRequest;
+import recordClasses.LoginResult;
+import recordClasses.LogoutRequest;
+import recordClasses.ListGamesResult;
 
 import java.util.List;
 
@@ -28,7 +37,7 @@ public class ServerFacadeTests {
     }
 
     @BeforeEach
-    public void setup() throws DataAccessException {
+    public void setup() throws Exception {
         facade.clear();
     }
 
@@ -43,7 +52,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void loginfailure() throws DataAccessException{
+    void loginfailure() throws Exception{
         try{
             RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
             facade.register(registerRequest);
@@ -59,7 +68,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void registerSuccess() throws DataAccessException{
+    void registerSuccess() throws Exception{
         RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
         var authData = facade.register(registerRequest);
         Assertions.assertNotNull(authData.authToken());
@@ -67,7 +76,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void registerfailure() throws DataAccessException{
+    void registerfailure() throws Exception{
         try{
             RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
             facade.register(registerRequest);
@@ -82,7 +91,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void logoutSuccess() throws DataAccessException{
+    void logoutSuccess() throws Exception{
         RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
         facade.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("Theben", "12345");
@@ -95,7 +104,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void logoutFailure() throws DataAccessException{
+    void logoutFailure() throws Exception{
         try{
             RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
             facade.register(registerRequest);
@@ -112,7 +121,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void createGameSuccess() throws DataAccessException{
+    void createGameSuccess() throws Exception{
         RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
         facade.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("Theben", "12345");
@@ -126,7 +135,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void createGamefailure() throws DataAccessException{
+    void createGamefailure() throws Exception{
         try{
             RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
             facade.register(registerRequest);
@@ -158,7 +167,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void listGamesfailure() throws DataAccessException{
+    void listGamesfailure() throws Exception{
         try{
             RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
             facade.register(registerRequest);
@@ -169,14 +178,14 @@ public class ServerFacadeTests {
             ListGamesResult listGamesResult = facade.listGames(listGamesRequest);
             Assertions.fail("should have thrown an exception");
         }
-        catch(DataAccessException dataAccessException){
-            Assertions.assertNotNull(dataAccessException.getMessage());
+        catch(DataAccessException Exception){
+            Assertions.assertNotNull(Exception.getMessage());
         }
 
     }
 
     @Test
-    void joinGameSuccess() throws DataAccessException{
+    void joinGameSuccess() throws Exception{
         RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
         facade.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("Theben", "12345");
@@ -191,7 +200,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void joinGameFailure() throws DataAccessException{
+    void joinGameFailure() throws Exception{
         try{
             RegisterRequest registerRequest = new RegisterRequest("Theben", "12345", "password");
             facade.register(registerRequest);
@@ -205,8 +214,8 @@ public class ServerFacadeTests {
             facade.joinGame(joinGameRequest);
             Assertions.fail("should have thrown an exception");
         }
-        catch(DataAccessException dataAccessException){
-            Assertions.assertNotNull(dataAccessException.getMessage());
+        catch(Exception exception){
+            Assertions.assertNotNull(exception.getMessage());
         }
 
     }
@@ -221,8 +230,8 @@ public class ServerFacadeTests {
             facade.login(loginRequest);
             Assertions.fail("should have thrown an exception");
         }
-        catch(DataAccessException dataAccessException){
-            Assertions.assertNotNull(dataAccessException.getMessage());
+        catch(Exception exception){
+            Assertions.assertNotNull(exception.getMessage());
         }
     }
 
