@@ -220,8 +220,8 @@ public class LoginREPL {
                     int realID = game.gameID();
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.joinGame(joinGameRequest);
-                    state = state.GAMEPLAY;
-                    Boolean color = playercolor.equals("white");
+                    //state = state.GAMEPLAY;
+                    Boolean color = playercolor.equalsIgnoreCase("white");
                     ui.BoardDraw.drawBoard(color);
                     return String.format("You successfully joined a game");
                 }
@@ -259,9 +259,7 @@ public class LoginREPL {
                 game_num++;
                 if (game_num == gameID) {
                     int realID = game.gameID();
-                    JoinGameRequest joinGameRequest = new JoinGameRequest(null, realID, authtoken);
-                    server.joinGame(joinGameRequest);
-                    state = state.GAMEPLAY;
+                    //state = state.GAMEPLAY;
                     ui.BoardDraw.drawBoard(true);
                     return String.format("You successfully joined a game");
                 }

@@ -157,7 +157,12 @@ public class BoardDraw {
                         color = false;
                     }
                     if (color == true) {
-                        out.print(SET_BG_COLOR_WHITE);
+                        if(pieceColor == true) {
+                            out.print(SET_BG_COLOR_WHITE);
+                        }
+                        else if(pieceColor == false) {
+                            out.print(SET_BG_COLOR_BLUE);
+                        }
                         if(j == backRow){
                             piece = true;
                             if(i == 1 || i == 8){
@@ -169,12 +174,23 @@ public class BoardDraw {
                             if(i == 3 || i == 6){
                                 out.print(bishopTwo);
                             }
-                            if(i == 4){
-                                out.print(queenTwo);
+                            if(pieceColor == true) {
+                                if (i == 4) {
+                                    out.print(queen);
+                                }
+                                if (i == 5) {
+                                    out.print(kingTwo);
+                                }
                             }
-                            if(i == 5){
-                                out.print(kingTwo);
+                            else if(pieceColor == false) {
+                                if (i == 4) {
+                                    out.print(kingTwo);
+                                }
+                                if (i == 5) {
+                                    out.print(queenTwo);
+                                }
                             }
+
                         }
                         if(j == frontRow){
                             piece = true;
@@ -187,11 +203,21 @@ public class BoardDraw {
                             if(i == 3 || i == 6){
                                 out.print(bishop);
                             }
-                            if(i == 4){
-                                out.print(queen);
+                            if(pieceColor == true) {
+                                if (i == 4) {
+                                    out.print(queen);
+                                }
+                                if (i == 5) {
+                                    out.print(kingTwo);
+                                }
                             }
-                            if(i == 5){
-                                out.print(king);
+                            else if(pieceColor == false) {
+                                if (i == 4) {
+                                    out.print(kingTwo);
+                                }
+                                if (i == 5) {
+                                    out.print(queen);
+                                }
                             }
                         }
                         if(j == pawnRowOne){
@@ -205,7 +231,12 @@ public class BoardDraw {
                             out.print(pawnTwo);
                         }
                     } else {
-                        out.print(SET_BG_COLOR_BLUE);
+                        if(pieceColor == true) {
+                            out.print(SET_BG_COLOR_BLUE);
+                        }
+                        else if(pieceColor == false) {
+                            out.print(SET_BG_COLOR_WHITE);
+                        }
                         if(j == backRow){
                             piece = true;
                             if(i == 1 || i == 8){
@@ -221,7 +252,7 @@ public class BoardDraw {
                                 out.print(queenTwo);
                             }
                             if(i == 5){
-                                out.print(kingTwo);
+                                out.print(queenTwo);
                             }
                         }
                         if(j == frontRow){
@@ -235,11 +266,21 @@ public class BoardDraw {
                             if(i == 3 || i == 6){
                                 out.print(bishop);
                             }
-                            if(i == 4){
-                                out.print(queen);
+                            if(pieceColor == true) {
+                                if (i == 4) {
+                                    out.print(queen);
+                                }
+                                if (i == 5) {
+                                    out.print(king);
+                                }
                             }
-                            if(i == 5){
-                                out.print(king);
+                            else if(pieceColor == false) {
+                                if (i == 4) {
+                                    out.print(king);
+                                }
+                                if (i == 5) {
+                                    out.print(queen);
+                                }
                             }
                         }
                         if(j == pawnRowOne){
