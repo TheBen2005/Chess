@@ -4,16 +4,8 @@ package client;
 import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
-import service.*;
-import recordClasses.CreateGameRequest;
-import recordClasses.LoginRequest;
-import recordClasses.RegisterRequest;
+import recordClasses.*;
 
-import recordClasses.ListGamesRequest;
-import recordClasses.JoinGameRequest;
-
-import recordClasses.LogoutRequest;
-import recordClasses.ListGamesResult;
 
 import java.util.List;
 
