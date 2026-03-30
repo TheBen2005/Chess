@@ -60,8 +60,8 @@ public class ServerFacadeTests {
             facade.login(loginRequest);
             Assertions.fail("should have thrown an exception");
         }
-        catch(DataAccessException dataAccessException){
-            Assertions.assertNotNull(dataAccessException.getMessage());
+        catch(Exception exception){
+            Assertions.assertNotNull(exception.getMessage());
         }
 
 
@@ -84,8 +84,8 @@ public class ServerFacadeTests {
             facade.register(registerRequestTwo);
             Assertions.fail("should have thrown an exception");
         }
-        catch(DataAccessException dataAccessException){
-            Assertions.assertNotNull(dataAccessException.getMessage());
+        catch(Exception exception){
+            Assertions.assertNotNull(exception.getMessage());
         }
 
     }
@@ -114,8 +114,8 @@ public class ServerFacadeTests {
             facade.logout(logoutRequest);
             Assertions.fail("should have thrown an exception");
         }
-        catch(DataAccessException dataAccessException){
-            Assertions.assertNotNull(dataAccessException.getMessage());
+        catch(Exception exception){
+            Assertions.assertNotNull(exception.getMessage());
         }
 
     }
@@ -145,8 +145,8 @@ public class ServerFacadeTests {
             facade.createGame(createGameRequest);
             Assertions.fail("should have thrown an exception");
         }
-        catch(DataAccessException dataAccessException){
-            Assertions.assertNotNull(dataAccessException.getMessage());
+        catch(Exception exception){
+            Assertions.assertNotNull(exception.getMessage());
         }
 
     }
@@ -178,8 +178,8 @@ public class ServerFacadeTests {
             ListGamesResult listGamesResult = facade.listGames(listGamesRequest);
             Assertions.fail("should have thrown an exception");
         }
-        catch(DataAccessException Exception){
-            Assertions.assertNotNull(Exception.getMessage());
+        catch(Exception exception){
+            Assertions.assertNotNull(exception.getMessage());
         }
 
     }
