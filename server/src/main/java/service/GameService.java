@@ -67,7 +67,7 @@ public class GameService {
         String username = authData.username();
         GameData newData;
         if(joinGameRequest.playerColor() == null){
-            throw new DataAccessException("bad request");
+            return;
 
         }
         if(joinGameRequest.playerColor().equals("WHITE")){

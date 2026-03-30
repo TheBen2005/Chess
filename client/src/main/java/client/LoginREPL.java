@@ -73,13 +73,17 @@ public class LoginREPL {
                     case "playgame" -> playGame(params);
                     case "observegame" -> observeGame(params);
                     case "logout" -> logout();
-                    default -> help();
+                    default -> not_valid();
 
                 };
             }
             catch (Exception e){
                 return e.getMessage();
             }
+    }
+
+    private String not_valid(){
+        return "not valid input";
     }
 
 
@@ -203,9 +207,9 @@ public class LoginREPL {
         if (state != State.POSTLOGIN){
             return("Not logged in yet.");
         }
-        String playercolor = params[0];
-        int gameID = Integer.parseInt(params[1]);
+        String playercolor = params[0].toUpperCase();
         try {
+            int gameID = Integer.parseInt(params[1]);
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
             ListGamesResult listGamesResult = server.listGames(listGamesRequest);
             gamelist = listGamesResult.games();
@@ -217,7 +221,7 @@ public class LoginREPL {
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.joinGame(joinGameRequest);
                     state = state.GAMEPLAY;
-                    Boolean color = playercolor.equals("WHITE");
+                    Boolean color = playercolor.equals("white");
                     ui.BoardDraw.drawBoard(color);
                     return String.format("You successfully joined a game");
                 }
@@ -226,7 +230,7 @@ public class LoginREPL {
             }
 
         }
-        catch(DataAccessException dataAccessException) {
+        catch(DataAccessException | NumberFormatException Exception) {
             return String.format("Failed to join game");
 
         }
@@ -244,8 +248,9 @@ public class LoginREPL {
         if (state != State.POSTLOGIN){
             return("Not logged in yet.");
         }
-        int gameID = Integer.parseInt(params[0]);
+
         try {
+            int gameID = Integer.parseInt(params[0]);
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
             ListGamesResult listGamesResult = server.listGames(listGamesRequest);
             gamelist = listGamesResult.games();
@@ -262,7 +267,7 @@ public class LoginREPL {
                 }
             }
         }
-        catch(DataAccessException dataAccessException) {
+        catch(DataAccessException | NumberFormatException Exception) {
             return String.format("Failed to join game");
 
         }
