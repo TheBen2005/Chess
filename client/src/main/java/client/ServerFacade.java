@@ -2,8 +2,7 @@ package client;
 
 
 import com.google.gson.Gson;
-import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
+
 import model.*;
 import service.*;
 import recordClasses.CreateGameRequest;
@@ -21,7 +20,7 @@ import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.List;
+
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();

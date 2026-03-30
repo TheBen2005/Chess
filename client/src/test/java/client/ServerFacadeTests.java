@@ -1,6 +1,6 @@
 package client;
 
-import dataaccess.DataAccessException;
+
 import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -8,10 +8,10 @@ import service.*;
 import recordClasses.CreateGameRequest;
 import recordClasses.LoginRequest;
 import recordClasses.RegisterRequest;
-import recordClasses.RegisterResult;
+
 import recordClasses.ListGamesRequest;
 import recordClasses.JoinGameRequest;
-import recordClasses.LoginResult;
+
 import recordClasses.LogoutRequest;
 import recordClasses.ListGamesResult;
 

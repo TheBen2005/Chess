@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.List;
 
-import dataaccess.DataAccessException;
+
 import model.GameData;
 import recordClasses.CreateGameRequest;
 import recordClasses.LoginRequest;
@@ -18,7 +18,7 @@ import recordClasses.LogoutRequest;
 import recordClasses.ListGamesResult;
 
 
-import ui.EscapeSequences;
+
 
 public class LoginREPL {
     private String visitorName = null;
