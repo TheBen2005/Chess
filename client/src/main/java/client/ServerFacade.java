@@ -4,7 +4,7 @@ package client;
 import com.google.gson.Gson;
 
 import model.*;
-import service.*;
+
 import recordClasses.CreateGameRequest;
 import recordClasses.LoginRequest;
 import recordClasses.RegisterRequest;
@@ -14,6 +14,7 @@ import recordClasses.JoinGameRequest;
 import recordClasses.LoginResult;
 import recordClasses.LogoutRequest;
 import recordClasses.ListGamesResult;
+import recordClasses.CreateGamesResult;
 
 import java.net.*;
 import java.net.http.*;
