@@ -6,6 +6,15 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
 import service.*;
+import recordClasses.CreateGameRequest;
+import recordClasses.LoginRequest;
+import recordClasses.RegisterRequest;
+import recordClasses.RegisterResult;
+import recordClasses.ListGamesRequest;
+import recordClasses.JoinGameRequest;
+import recordClasses.LoginResult;
+import recordClasses.LogoutRequest;
+import recordClasses.ListGamesResult;
 
 import java.net.*;
 import java.net.http.*;
@@ -22,14 +31,14 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public LoginResult login(LoginRequest request) throws DataAccessException {
+    public LoginResult login(LoginRequest request) throws Exception {
         var build = buildRequest("POST", "/session", request);
         var response = sendRequest(build);
         return handleResponse(response, LoginResult.class);
 
     }
 
-    public RegisterResult register(RegisterRequest request) throws DataAccessException {
+    public RegisterResult register(RegisterRequest request) throws Exception {
         var build = buildRequest("POST", "/user", request);
         var response = sendRequest(build);
         return handleResponse(response, RegisterResult.class);
@@ -37,27 +46,27 @@ public class ServerFacade {
     }
 
 
-    public void logout(LogoutRequest request) throws DataAccessException {
+    public void logout(LogoutRequest request) throws Exception {
         var build = buildRequest("DELETE", "/session", request);
         var response = sendRequest(build);
         handleResponse(response, null);
     }
 
-    public CreateGamesResult createGame(CreateGameRequest request) throws DataAccessException{
+    public CreateGamesResult createGame(CreateGameRequest request) throws Exception{
         var build = buildRequest("POST", "/game", request);
         var response = sendRequest(build);
         return handleResponse(response, CreateGamesResult.class);
 
     }
 
-    public ListGamesResult listGames(ListGamesRequest request) throws DataAccessException{
+    public ListGamesResult listGames(ListGamesRequest request) throws Exception{
         var build = buildRequest("GET", "/game", request);
         var response = sendRequest(build);
         return handleResponse(response, ListGamesResult.class);
 
     }
 
-    public void joinGame(JoinGameRequest request) throws DataAccessException{
+    public void joinGame(JoinGameRequest request) throws Exception{
         var build = buildRequest("PUT", "/game", request);
         var response = sendRequest(build);
         handleResponse(response, null);
@@ -65,7 +74,7 @@ public class ServerFacade {
 
     }
 
-    public void clear() throws DataAccessException{
+    public void clear() throws Exception{
         var build = buildRequest("DELETE", "/db", null);
         sendRequest(build);
 
@@ -102,7 +111,7 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws DataAccessException{
+    private HttpResponse<String> sendRequest(HttpRequest request) throws Exception{
         try{
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex){
@@ -111,15 +120,15 @@ public class ServerFacade {
 
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws DataAccessException{
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception{
         var status = response.statusCode();
         if (!isSuccessful(status)){
             var body = response.body();
             if (body != null){
-                throw new DataAccessException("Wrong response");
+                throw new Exception("Wrong response");
             }
 
-            throw new DataAccessException("other failure: " + status);
+            throw new Exception("other failure: " + status);
 
         }
         if (responseClass != null) {

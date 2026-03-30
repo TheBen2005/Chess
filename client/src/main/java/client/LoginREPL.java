@@ -7,15 +7,15 @@ import java.util.List;
 
 import dataaccess.DataAccessException;
 import model.GameData;
-import service.CreateGameRequest;
-import service.LoginRequest;
-import service.RegisterRequest;
-import service.RegisterResult;
-import service.ListGamesRequest;
-import service.JoinGameRequest;
-import service.LoginResult;
-import service.LogoutRequest;
-import service.ListGamesResult;
+import recordClasses.CreateGameRequest;
+import recordClasses.LoginRequest;
+import recordClasses.RegisterRequest;
+import recordClasses.RegisterResult;
+import recordClasses.ListGamesRequest;
+import recordClasses.JoinGameRequest;
+import recordClasses.LoginResult;
+import recordClasses.LogoutRequest;
+import recordClasses.ListGamesResult;
 
 
 import ui.EscapeSequences;
@@ -28,7 +28,7 @@ public class LoginREPL {
     private List<GameData> gamelist;
 
 
-    public LoginREPL(String serverUrl) throws DataAccessException {
+    public LoginREPL(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
     }
     public enum State {
@@ -103,7 +103,7 @@ public class LoginREPL {
             state = state.POSTLOGIN;
             return String.format("You signed in as %s.", name);
         }
-        catch(DataAccessException dataAccessException) {
+        catch(Exception exception) {
             return String.format("Failed to login");
 
         }
@@ -135,7 +135,7 @@ public class LoginREPL {
             state = state.POSTLOGIN;
             return String.format("You signed in as %s.", username);
         }
-        catch(DataAccessException dataAccessException) {
+        catch(Exception exception) {
             return String.format("Failed to register");
 
         }
@@ -153,7 +153,7 @@ public class LoginREPL {
             authtoken = "";
             return String.format("You successfully signed out.");
         }
-        catch(DataAccessException dataAccessException) {
+        catch(Exception exception) {
             return String.format("Failed to logout");
 
         }
@@ -173,7 +173,7 @@ public class LoginREPL {
             server.createGame(createGameRequest);
             return String.format("You successfully created a game");
         }
-        catch(DataAccessException dataAccessException) {
+        catch(Exception exception) {
             return String.format("Failed to create a game");
 
         }
@@ -195,7 +195,7 @@ public class LoginREPL {
             }
             return result.toString();
         }
-        catch(DataAccessException dataAccessException) {
+        catch(Exception exception) {
             return String.format("Failed to listGames");
         }
     }
@@ -230,7 +230,7 @@ public class LoginREPL {
             }
 
         }
-        catch(DataAccessException | NumberFormatException Exception) {
+        catch(Exception exception) {
             return String.format("Failed to join game");
 
         }
@@ -267,7 +267,7 @@ public class LoginREPL {
                 }
             }
         }
-        catch(DataAccessException | NumberFormatException Exception) {
+        catch(Exception exception) {
             return String.format("Failed to join game");
 
         }
