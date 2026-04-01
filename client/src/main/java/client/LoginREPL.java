@@ -113,6 +113,11 @@ public class LoginREPL {
 
     }
 
+    public void makeMove(){
+
+
+    }
+
     public String quit() {
         return "quit";
 
