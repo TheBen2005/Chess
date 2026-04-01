@@ -11,9 +11,28 @@ import java.net.URISyntaxException;
 public class WebSocketFacade extends Endpoint{
 
     Session session;
-    ServerMessage serverMessage;
+    NotificationHandler notificationHandler;
 
-    public WebsocketFacade(String url, ServerMessage serverMessage) throws Exception{
+    public WebsocketFacade(String url, NotificationHandler notificationHandler) throws Exception{
+        try {
+            url = url.replace("http", "ws");
+            URI socketURI = new URI(url + "/ws");
+            this.notificationHandler = notificationHandler;
+
+            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            this.session = container.connectToServer(this, socketURI);
+
+            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+                @Override
+                public void onMessage(String message){
+                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+                    notificationHandler.notify(serverMessage);
+
+                }
+            });
+        } catch(Exception exception){
+            throw new Exception(exception.getMessage());
+        }
 
 
     }
@@ -26,18 +45,41 @@ public class WebSocketFacade extends Endpoint{
 
     }
 
-    public void Connect(){
+    public void connect(String authToken, Integer gameID) throws Exception{
+        try{
+            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (Exception exception){
+            throw new Exception(exception.getMessage());
+        }
 
     }
 
-    public void makeMove(){
+    public void makeMove(String authToken, Integer gameID) throws Exception{
+        try{
+            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (Exception exception){
+            throw new Exception(exception.getMessage());
+        }
 
     }
-    public void Leave(){
+    public void leave(String authToken, Integer gameID) throws Exception{
+        try{
+            var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (Exception exception){
+            throw new Exception(exception.getMessage());
+        }
 
     }
-    public void Resign(){
-
+    public void resign(String authToken, Integer gameID) throws Exception{
+        try{
+            var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (Exception exception){
+            throw new Exception(exception.getMessage());
+        }
     }
 
 }
