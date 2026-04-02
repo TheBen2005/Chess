@@ -32,6 +32,7 @@ public class LoginREPL {
 
     public LoginREPL(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
+        ws = new WebSocketFacade(serverUrl, this);
     }
     public enum State {
         PRELOGIN,
@@ -75,6 +76,11 @@ public class LoginREPL {
                     case "playgame" -> playGame(params);
                     case "observegame" -> observeGame(params);
                     case "logout" -> logout();
+                    case "highlight" -> highlight();
+                    case "resign" -> resign();
+                    case "make move" -> makeMove();
+                    case "leave" -> leave();
+                    case "redraw" -> redraw();
                     default -> not_valid();
 
                 };
@@ -115,28 +121,28 @@ public class LoginREPL {
 
     }
 
+    public void highlight(){
+
+    }
+
     public void makeMove(){
 
 
     }
 
-    public void connect(String... params){
-        int gameID = Integer.parseInt(params[0]);
-
-        try{
-            ws.connect(authtoken, gameID);
-        }
-        catch(Exception exception){
-
-        }
+    public void redraw(String... params){
 
     }
 
-    public void leave(){
-        int gameID = Integer.parseInt(params[0]);
+    public void leave() throws Exception{
+        if (state != State.GAMEPLAY){
+            throw new Exception("Not in game yet");
+        }
+
         try{
-            ws.connect(authtoken, gameID);
-            state = state.POSTLOGIN;
+
+
+
         }
         catch(Exception exception){
 
@@ -257,6 +263,7 @@ public class LoginREPL {
                     int realID = game.gameID();
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.joinGame(joinGameRequest);
+                    ws.connect(authtoken, realID);
                     //state = state.GAMEPLAY;
                     Boolean color = playercolor.equalsIgnoreCase("white");
                     ui.BoardDraw.drawBoard(color);
