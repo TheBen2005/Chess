@@ -6,6 +6,7 @@ import java.util.Scanner;
 import java.util.List;
 
 
+import client.websocket.WebSocketFacade;
 import model.GameData;
 import recordClasses.CreateGameRequest;
 import recordClasses.LoginRequest;
@@ -26,6 +27,7 @@ public class LoginREPL {
     private State state = State.PRELOGIN;
     private String authtoken = "";
     private List<GameData> gamelist;
+    private final WebSocketFacade ws;
 
 
     public LoginREPL(String serverUrl) throws Exception {
@@ -115,6 +117,36 @@ public class LoginREPL {
 
     public void makeMove(){
 
+
+    }
+
+    public void connect(String... params){
+        int gameID = Integer.parseInt(params[0]);
+
+        try{
+            ws.connect(authtoken, gameID);
+        }
+        catch(Exception exception){
+
+        }
+
+    }
+
+    public void leave(){
+        int gameID = Integer.parseInt(params[0]);
+        try{
+            ws.connect(authtoken, gameID);
+            state = state.POSTLOGIN;
+        }
+        catch(Exception exception){
+
+        }
+
+
+
+    }
+
+    public void resign(){
 
     }
 
