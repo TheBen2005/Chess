@@ -10,6 +10,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import io.javalin.json.JavalinGson;
 import service.*;
+import websocket.commands.UserGameCommand;
 
 public class Server {
 
@@ -36,7 +37,38 @@ public class Server {
         javalin.post("/game", this::createGameHandler);
         javalin.put("/game", this::joinGameHandler);
         javalin.delete("/db", this::clearApplicationHandler);
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(ctx -> {
+                ctx.enableAutomaticPings();
+                System.out.println("Websocket connected");
+            });
+            ws.onMessage(ctx -> webSocketHandlerHelper(ctx.getUpgradeCtx$javalin()));
 
+            ws.onClose(_ -> System.out.println("Websocket closed"));
+        });
+
+
+    }
+
+    private void webSocketHandlerHelper(Context userInfo){
+        var serializer = new Gson();
+        UserGameCommand userGameCommand = serializer.fromJson(userInfo.body(), UserGameCommand.class);
+        if(userGameCommand.getCommandType() == UserGameCommand.CommandType.CONNECT){
+            connectHandler(userGameCommand);
+        }
+
+
+    }
+    private void connectHandler(UserGameCommand userGameCommand){
+
+    }
+    private void makeMoveHandler(UserGameCommand userGameCommand){
+
+    }
+    private void leaveGameHandler(UserGameCommand userGameCommand){
+
+    }
+    private void resignGameHandler(UserGameCommand userGameCommand){
 
     }
 

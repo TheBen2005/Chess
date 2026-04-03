@@ -6,6 +6,7 @@ import java.util.Scanner;
 import java.util.List;
 
 
+import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;
 import recordClasses.CreateGameRequest;
@@ -17,11 +18,11 @@ import recordClasses.JoinGameRequest;
 import recordClasses.LoginResult;
 import recordClasses.LogoutRequest;
 import recordClasses.ListGamesResult;
+import websocket.messages.ServerMessage;
 
 
 
-
-public class LoginREPL {
+public class LoginREPL implements NotificationHandler {
     private String visitorName = null;
     private final ServerFacade server;
     private State state = State.PRELOGIN;
@@ -34,6 +35,11 @@ public class LoginREPL {
         server = new ServerFacade(serverUrl);
         ws = new WebSocketFacade(serverUrl, this);
     }
+
+    public void notify(ServerMessage serverMessage) {
+
+    }
+
     public enum State {
         PRELOGIN,
         POSTLOGIN,
@@ -76,11 +82,11 @@ public class LoginREPL {
                     case "playgame" -> playGame(params);
                     case "observegame" -> observeGame(params);
                     case "logout" -> logout();
-                    case "highlight" -> highlight();
+                    /*case "highlight" -> highlight();
                     case "resign" -> resign();
                     case "make move" -> makeMove();
                     case "leave" -> leave();
-                    case "redraw" -> redraw();
+                    case "redraw" -> redraw();*/
                     default -> not_valid();
 
                 };

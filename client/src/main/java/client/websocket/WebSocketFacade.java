@@ -1,23 +1,25 @@
 package client.websocket;
+import client.LoginREPL;
 import com.google.gson.Gson;
 import websocket.messages.ServerMessage;
 import websocket.commands.UserGameCommand;
 import jakarta.websocket.*;
-import java.io.IOException;
+
 import java.net.URI;
-import java.net.URISyntaxException;
 
 
 public class WebSocketFacade extends Endpoint{
 
     Session session;
     NotificationHandler notificationHandler;
+    String url;
 
-    public WebsocketFacade(String url, NotificationHandler notificationHandler) throws Exception{
+
+    public WebSocketFacade(String url, LoginREPL notificationHandler) throws Exception{
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
-            this.notificationHandler = notificationHandler;
+            this.notificationHandler = (NotificationHandler) notificationHandler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
