@@ -1,5 +1,7 @@
 package server;
 
+import websocket.messages.ServerMessage;
+import io.javalin.websocket.WsMessageContext;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -42,7 +44,7 @@ public class Server {
                 ctx.enableAutomaticPings();
                 System.out.println("Websocket connected");
             });
-            ws.onMessage(ctx -> webSocketHandlerHelper(ctx.getUpgradeCtx$javalin()));
+            ws.onMessage(ctx -> webSocketHandlerHelper(ctx));
 
             ws.onClose(_ -> System.out.println("Websocket closed"));
         });
@@ -50,25 +52,36 @@ public class Server {
 
     }
 
-    private void webSocketHandlerHelper(Context userInfo){
+    private void webSocketHandlerHelper(WsMessageContext userInfo){
         var serializer = new Gson();
-        UserGameCommand userGameCommand = serializer.fromJson(userInfo.body(), UserGameCommand.class);
+        UserGameCommand userGameCommand = serializer.fromJson(userInfo.message(), UserGameCommand.class);
         if(userGameCommand.getCommandType() == UserGameCommand.CommandType.CONNECT){
             connectHandler(userGameCommand);
         }
-
-
+        else if(userGameCommand.getCommandType() == UserGameCommand.CommandType.LEAVE){
+            leaveHandler(userGameCommand);
+        }
+        else if(userGameCommand.getCommandType() == UserGameCommand.CommandType.RESIGN){
+            resignHandler(userGameCommand);
+        }
+        else if(userGameCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE){
+            makeMoveHandler(userGameCommand);
+        }
     }
     private void connectHandler(UserGameCommand userGameCommand){
+        ServerMessage serverMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+
+
+
 
     }
     private void makeMoveHandler(UserGameCommand userGameCommand){
 
     }
-    private void leaveGameHandler(UserGameCommand userGameCommand){
+    private void leaveHandler(UserGameCommand userGameCommand){
 
     }
-    private void resignGameHandler(UserGameCommand userGameCommand){
+    private void resignHandler(UserGameCommand userGameCommand){
 
     }
 
