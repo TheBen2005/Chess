@@ -56,9 +56,9 @@ public class WebSocketFacade extends Endpoint{
 
     }
 
-    public void connect(String authToken, Integer gameID) throws Exception{
+    public void connect(String authToken, Integer gameID, String userName) throws Exception{
         try{
-            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, userName);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (Exception exception){
             throw new Exception(exception.getMessage());
@@ -66,27 +66,27 @@ public class WebSocketFacade extends Endpoint{
 
     }
 
-    public void makeMove(String authToken, Integer gameID) throws Exception{
+    public void makeMove(String authToken, Integer gameID, String userName) throws Exception{
         try{
-            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID);
+            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, userName);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (Exception exception){
             throw new Exception(exception.getMessage());
         }
 
     }
-    public void leave(String authToken, Integer gameID) throws Exception{
+    public void leave(String authToken, Integer gameID, String userName) throws Exception{
         try{
-            var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+            var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, userName);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (Exception exception){
             throw new Exception(exception.getMessage());
         }
 
     }
-    public void resign(String authToken, Integer gameID) throws Exception{
+    public void resign(String authToken, Integer gameID, String userName) throws Exception{
         try{
-            var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+            var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID, userName);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (Exception exception){
             throw new Exception(exception.getMessage());

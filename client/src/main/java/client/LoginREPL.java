@@ -266,6 +266,7 @@ public class LoginREPL implements NotificationHandler {
             return("Not logged in yet.");
         }
         String playercolor = params[0].toUpperCase();
+        String userName = "";
         try {
             int gameID = Integer.parseInt(params[1]);
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
@@ -278,7 +279,13 @@ public class LoginREPL implements NotificationHandler {
                     int realID = game.gameID();
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.joinGame(joinGameRequest);
-                    ws.connect(authtoken, realID);
+                    if(playercolor.equals("WHITE")){
+                        userName = game.whiteUsername();
+                    }
+                    else if(playercolor.equals("BLACK")){
+                        userName = game.blackUsername();
+                    }
+                    ws.connect(authtoken, realID, userName);
                     //state = state.GAMEPLAY;
                     Boolean color = playercolor.equalsIgnoreCase("white");
                     ui.BoardDraw.drawBoard(color);

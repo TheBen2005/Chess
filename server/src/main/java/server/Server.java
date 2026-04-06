@@ -8,17 +8,21 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import io.javalin.*;
+import org.eclipse.jetty.websocket.api.Session;
 
 import io.javalin.http.Context;
 import io.javalin.json.JavalinGson;
 import service.*;
 import websocket.commands.UserGameCommand;
 
+import java.io.IOException;
+
 
 public class Server {
 
     private final Javalin javalin;
     private DataAccess dataAccess;
+    private final ConnectionManager connections = new ConnectionManager();
 
     public Server() {
 
@@ -53,36 +57,43 @@ public class Server {
 
     }
 
-    private void webSocketHandlerHelper(WsMessageContext userInfo){
+    private void webSocketHandlerHelper(WsMessageContext userInfo) throws IOException {
         var serializer = new Gson();
         UserGameCommand userGameCommand = serializer.fromJson(userInfo.message(), UserGameCommand.class);
         if(userGameCommand.getCommandType() == UserGameCommand.CommandType.CONNECT){
-            connectHandler(userGameCommand);
+            connectHandler(userGameCommand, userInfo.session);
         }
         else if(userGameCommand.getCommandType() == UserGameCommand.CommandType.LEAVE){
-            leaveHandler(userGameCommand);
+            leaveHandler(userGameCommand, userInfo.session);
         }
         else if(userGameCommand.getCommandType() == UserGameCommand.CommandType.RESIGN){
-            resignHandler(userGameCommand);
+            resignHandler(userGameCommand, userInfo.session);
         }
         else if(userGameCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE){
-            makeMoveHandler(userGameCommand);
+            makeMoveHandler(userGameCommand, userInfo.session);
         }
     }
-    private void connectHandler(UserGameCommand userGameCommand){
-        ServerMessage serverMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+    private void connectHandler(UserGameCommand userGameCommand, Session session) throws IOException {
+        String userName = userGameCommand.getUserName();
+        int gameId = userGameCommand.getGameID();
+        connections.add(session, userName, gameId);
+        var message = String.format("%s is in the shop", userName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(session, serverMessage);
+
+
 
 
 
 
     }
-    private void makeMoveHandler(UserGameCommand userGameCommand){
+    private void makeMoveHandler(UserGameCommand userGameCommand, Session session){
 
     }
-    private void leaveHandler(UserGameCommand userGameCommand){
+    private void leaveHandler(UserGameCommand userGameCommand, Session session){
 
     }
-    private void resignHandler(UserGameCommand userGameCommand){
+    private void resignHandler(UserGameCommand userGameCommand, Session session){
 
     }
 
