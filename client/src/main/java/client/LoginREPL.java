@@ -36,7 +36,16 @@ public class LoginREPL implements NotificationHandler {
         ws = new WebSocketFacade(serverUrl, this);
     }
 
-    public void notify(ServerMessage serverMessage) {
+    public void loadGame(ServerMessage serverMessage) {
+
+
+    }
+
+    public void error(ServerMessage serverMessage){
+
+    }
+
+    public void notification(ServerMessage serverMessage){
 
     }
 

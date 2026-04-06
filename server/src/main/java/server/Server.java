@@ -14,6 +14,7 @@ import io.javalin.json.JavalinGson;
 import service.*;
 import websocket.commands.UserGameCommand;
 
+
 public class Server {
 
     private final Javalin javalin;

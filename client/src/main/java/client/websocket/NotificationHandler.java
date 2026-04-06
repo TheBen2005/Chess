@@ -4,10 +4,10 @@ import websocket.messages.ServerMessage;
 
 
 public interface NotificationHandler {
-    void loadGame();
+    void loadGame(ServerMessage serverMessage);
 
-    void error();
+    void error(ServerMessage serverMessage);
 
-    void notification();
+    void notification(ServerMessage serverMessage);
 
 }

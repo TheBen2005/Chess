@@ -29,13 +29,13 @@ public class WebSocketFacade extends Endpoint{
                 public void onMessage(String message){
                     ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
                     if(serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME){
-                        notificationHandler.loadGame();
+                        notificationHandler.loadGame(serverMessage);
                     }
                     else if(serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR){
-                        notificationHandler.error();
+                        notificationHandler.error(serverMessage);
                     }
                     else if(serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
-                        notificationHandler.notification();
+                        notificationHandler.notification(serverMessage);
                     }
 
 
