@@ -27,28 +27,40 @@ public class ConnectionManager {
         connectionsGames.put(gameId, users);
     }
 
-    public void specific_user(Session session, ServerMessage serverMessage) throws IOException {
-        String msg = serverMessage.getServerMessage();
-        String serverMessageString = new Gson().toJson(serverMessage);
-        for(Session c: connectionsUsers.values()){
-            if(c.isOpen()){
-                if(c.equals(session)){
-                    c.getRemote().sendString(serverMessageString);
+    public void specific_user(Session session, ServerMessage serverMessage, int gameId, String userName) throws IOException {
+        Gson gson = new Gson();
+        String msg = gson.toJson(serverMessage);
+        List<String> userList = connectionsGames.get(gameId);
+        if(userList == null){
+            return;
+        }
+        for(String user: userList){
+            if(user.equals(userName)){
+                if(session != null && session.isOpen()){
+                    session.getRemote().sendString(msg);
                 }
+
             }
         }
     }
 
 
 
-    public void broadcast(Session excludeSession, ServerMessage serverMessage) throws IOException{
-        String msg = serverMessage.getServerMessage();
-        for(Session c: connectionsUsers.values()){
-            if (c.isOpen()){
-                if (!c.equals(excludeSession)){
-                    c.getRemote().sendString(msg);
+    public void broadcast(ServerMessage serverMessage, int gameId, String userName) throws IOException{
+        Gson gson = new Gson();
+        String msg = gson.toJson(serverMessage);
+        List<String> userList = connectionsGames.get(gameId);
+        if(userList == null){
+            return;
+        }
+        for(String user: userList){
+            if(!user.equals(userName)){
+                Session session = connectionsUsers.get(user);
+                if(session != null && session.isOpen()){
+                    session.getRemote().sendString(msg);
                 }
             }
+
         }
     }
 }

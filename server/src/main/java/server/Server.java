@@ -77,18 +77,18 @@ public class Server {
         String userName = userGameCommand.getUserName();
         int gameId = userGameCommand.getGameID();
         String playerColor = "";
-        if(userGameCommand.equals("WHITE")){
+        if(userName.equals("WHITE")){
             playerColor = "white";
         }
-        else if(userGameCommand.equals("BLACK")){
+        else if(userName.equals("BLACK")){
             playerColor = "black";
         }
         connections.add(session, userName, gameId);
         var message = String.format("%s connected as %s", userName, playerColor);
         var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, playerColor);
-        connections.broadcast(session, serverMessage);
+        connections.broadcast(serverMessage, gameId, userName);
         var gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, playerColor);
-        connections.specific_user(session, gameServerMessage);
+        connections.specific_user(session, gameServerMessage, gameId, userName);
 
 
     }
