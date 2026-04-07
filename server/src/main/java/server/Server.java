@@ -76,14 +76,19 @@ public class Server {
     private void connectHandler(UserGameCommand userGameCommand, Session session) throws IOException {
         String userName = userGameCommand.getUserName();
         int gameId = userGameCommand.getGameID();
+        String playerColor = "";
+        if(userGameCommand.equals("WHITE")){
+            playerColor = "white";
+        }
+        else if(userGameCommand.equals("BLACK")){
+            playerColor = "black";
+        }
         connections.add(session, userName, gameId);
-        var message = String.format("%s is in the shop", userName);
-        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        var message = String.format("%s connected as %s", userName, playerColor);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, playerColor);
         connections.broadcast(session, serverMessage);
-
-
-
-
+        var gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, playerColor);
+        connections.specific_user(session, gameServerMessage);
 
 
     }

@@ -37,6 +37,14 @@ public class LoginREPL implements NotificationHandler {
     }
 
     public void loadGame(ServerMessage serverMessage) {
+        String color = serverMessage.getPlayerColor();
+        if(color.equals("white")){
+            ui.BoardDraw.drawBoard(true);
+        }
+        else if(color.equals("black")){
+            ui.BoardDraw.drawBoard(false);
+        }
+
 
 
     }
@@ -46,6 +54,9 @@ public class LoginREPL implements NotificationHandler {
     }
 
     public void notification(ServerMessage serverMessage){
+        String message = serverMessage.getServerMessage();
+        System.out.println(message);
+        printPrompt();
 
     }
 
@@ -285,7 +296,7 @@ public class LoginREPL implements NotificationHandler {
                     else if(playercolor.equals("BLACK")){
                         userName = game.blackUsername();
                     }
-                    ws.connect(authtoken, realID, userName);
+                    ws.connect(authtoken, realID, userName, playercolor);
                     //state = state.GAMEPLAY;
                     Boolean color = playercolor.equalsIgnoreCase("white");
                     ui.BoardDraw.drawBoard(color);

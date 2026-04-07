@@ -1,5 +1,6 @@
 package server;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
@@ -25,8 +26,23 @@ public class ConnectionManager {
         users.remove(userName);
         connectionsGames.put(gameId, users);
     }
+
+    public void specific_user(Session session, ServerMessage serverMessage) throws IOException {
+        String msg = serverMessage.getServerMessage();
+        String serverMessageString = new Gson().toJson(serverMessage);
+        for(Session c: connectionsUsers.values()){
+            if(c.isOpen()){
+                if(c.equals(session)){
+                    c.getRemote().sendString(serverMessageString);
+                }
+            }
+        }
+    }
+
+
+
     public void broadcast(Session excludeSession, ServerMessage serverMessage) throws IOException{
-        String msg = serverMessage.toString();
+        String msg = serverMessage.getServerMessage();
         for(Session c: connectionsUsers.values()){
             if (c.isOpen()){
                 if (!c.equals(excludeSession)){
