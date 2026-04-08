@@ -75,12 +75,12 @@ public class Server {
     }
     private void connectHandler(UserGameCommand userGameCommand, Session session) throws IOException {
         String userName = userGameCommand.getUserName();
+        String playerColor = userGameCommand.getPlayerColor();
         int gameId = userGameCommand.getGameID();
-        String playerColor = "";
-        if(userName.equals("WHITE")){
+        if(playerColor.equals("WHITE")){
             playerColor = "white";
         }
-        else if(userName.equals("BLACK")){
+        else if(playerColor.equals("BLACK")){
             playerColor = "black";
         }
         connections.add(session, userName, gameId);

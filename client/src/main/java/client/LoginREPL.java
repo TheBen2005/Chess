@@ -29,6 +29,7 @@ public class LoginREPL implements NotificationHandler {
     private String authtoken = "";
     private List<GameData> gamelist;
     private final WebSocketFacade ws;
+    private String username = "";
 
 
     public LoginREPL(String serverUrl) throws Exception {
@@ -44,6 +45,9 @@ public class LoginREPL implements NotificationHandler {
         else if(color.equals("black")){
             ui.BoardDraw.drawBoard(false);
         }
+
+        System.out.println("This is working");
+
 
 
 
@@ -134,6 +138,7 @@ public class LoginREPL implements NotificationHandler {
             LoginRequest loginRequest = new LoginRequest(name, password);
             LoginResult loginResult = server.login(loginRequest);
             authtoken = loginResult.authToken();
+            username = loginResult.username();
             state = state.POSTLOGIN;
             return String.format("You signed in as %s.", name);
         }
@@ -201,6 +206,7 @@ public class LoginREPL implements NotificationHandler {
             RegisterRequest registerRequest = new RegisterRequest(username, password, email);
             RegisterResult registerResult = server.register(registerRequest);
             authtoken = registerResult.authToken();
+            username = registerResult.username();
             state = state.POSTLOGIN;
             return String.format("You signed in as %s.", username);
         }
@@ -220,6 +226,7 @@ public class LoginREPL implements NotificationHandler {
             server.logout(logoutRequest);
             state = state.PRELOGIN;
             authtoken = "";
+            username = "";
             return String.format("You successfully signed out.");
         }
         catch(Exception exception) {
@@ -277,7 +284,6 @@ public class LoginREPL implements NotificationHandler {
             return("Not logged in yet.");
         }
         String playercolor = params[0].toUpperCase();
-        String userName = "";
         try {
             int gameID = Integer.parseInt(params[1]);
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);
@@ -290,16 +296,9 @@ public class LoginREPL implements NotificationHandler {
                     int realID = game.gameID();
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.joinGame(joinGameRequest);
-                    if(playercolor.equals("WHITE")){
-                        userName = game.whiteUsername();
-                    }
-                    else if(playercolor.equals("BLACK")){
-                        userName = game.blackUsername();
-                    }
-                    ws.connect(authtoken, realID, userName, playercolor);
+                    ws.connect(authtoken, realID, username, playercolor);
                     //state = state.GAMEPLAY;
                     Boolean color = playercolor.equalsIgnoreCase("white");
-                    ui.BoardDraw.drawBoard(color);
                     return String.format("You successfully joined a game");
                 }
 
