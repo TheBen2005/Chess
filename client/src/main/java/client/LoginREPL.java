@@ -331,12 +331,13 @@ public class LoginREPL implements NotificationHandler {
             ListGamesResult listGamesResult = server.listGames(listGamesRequest);
             gamelist = listGamesResult.games();
             int game_num = 0;
+            String playerColor = "observe";
             for (GameData game : gamelist) {
                 game_num++;
                 if (game_num == gameID) {
                     int realID = game.gameID();
                     //state = state.GAMEPLAY;
-                    ui.BoardDraw.drawBoard(true);
+                    ws.connect(authtoken, realID, username, playerColor);
                     return String.format("You successfully joined a game");
                 }
             }
