@@ -30,6 +30,7 @@ public class LoginREPL implements NotificationHandler {
     private List<GameData> gamelist;
     private final WebSocketFacade ws;
     private String username = "";
+    private int game_id;
 
 
     public LoginREPL(String serverUrl) throws Exception {
@@ -106,6 +107,7 @@ public class LoginREPL implements NotificationHandler {
                     case "playgame" -> playGame(params);
                     case "observegame" -> observeGame(params);
                     case "logout" -> logout();
+                    case "leave" -> leave();
                     /*case "highlight" -> highlight();
                     case "resign" -> resign();
                     case "make move" -> makeMove();
@@ -165,19 +167,14 @@ public class LoginREPL implements NotificationHandler {
 
     }
 
-    public void leave() throws Exception{
+    public String leave() throws Exception{
         if (state != State.GAMEPLAY){
             throw new Exception("Not in game yet");
         }
+        ws.leave(authtoken, game_id, username);
+        state = state.POSTLOGIN;
+        return "You left.";
 
-        try{
-
-
-
-        }
-        catch(Exception exception){
-
-        }
 
 
 
@@ -294,10 +291,11 @@ public class LoginREPL implements NotificationHandler {
                 game_num++;
                 if (game_num == gameID) {
                     int realID = game.gameID();
+                    game_id = realID;
                     JoinGameRequest joinGameRequest = new JoinGameRequest(playercolor, realID, authtoken);
                     server.joinGame(joinGameRequest);
                     ws.connect(authtoken, realID, username, playercolor);
-                    //state = state.GAMEPLAY;
+                    state = state.GAMEPLAY;
                     Boolean color = playercolor.equalsIgnoreCase("white");
                     return String.format("You successfully joined a game");
                 }
@@ -336,7 +334,8 @@ public class LoginREPL implements NotificationHandler {
                 game_num++;
                 if (game_num == gameID) {
                     int realID = game.gameID();
-                    //state = state.GAMEPLAY;
+                    game_id = realID;
+                    state = state.GAMEPLAY;
                     ws.connect(authtoken, realID, username, playerColor);
                     return String.format("You successfully joined a game");
                 }

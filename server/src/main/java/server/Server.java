@@ -1,5 +1,6 @@
 package server;
 
+import model.GameData;
 import websocket.messages.ServerMessage;
 import io.javalin.websocket.WsMessageContext;
 import com.google.gson.Gson;
@@ -57,7 +58,7 @@ public class Server {
 
     }
 
-    private void webSocketHandlerHelper(WsMessageContext userInfo) throws IOException {
+    private void webSocketHandlerHelper(WsMessageContext userInfo) throws IOException, DataAccessException{
         var serializer = new Gson();
         UserGameCommand userGameCommand = serializer.fromJson(userInfo.message(), UserGameCommand.class);
         if(userGameCommand.getCommandType() == UserGameCommand.CommandType.CONNECT){
@@ -111,7 +112,29 @@ public class Server {
     private void makeMoveHandler(UserGameCommand userGameCommand, Session session){
 
     }
-    private void leaveHandler(UserGameCommand userGameCommand, Session session){
+    private void leaveHandler(UserGameCommand userGameCommand, Session session) throws IOException, DataAccessException {
+        String userName = userGameCommand.getUserName();
+        int gameId = userGameCommand.getGameID();
+        connections.remove(session, userName, gameId);
+        var message = String.format("%s left the game", userName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, "");
+        connections.broadcast(serverMessage, gameId, userName);
+        MySqlDataAccess dataAccess = new MySqlDataAccess();
+        GameData game = dataAccess.getGame(gameId);
+        if(game == null){
+            return;
+        }
+        GameData newData = null;
+        if(game.blackUsername() != null && userName.equals(game.blackUsername())){
+            newData = new GameData(gameId, game.whiteUsername(), null, game.gameName(), game.game());
+        }
+        else if(game.whiteUsername() != null && userName.equals(game.whiteUsername())){
+            newData = new GameData(gameId, null, game.blackUsername(), game.gameName(), game.game());
+        }
+        if(newData != null){
+            dataAccess.updateGame(newData);
+        }
+
 
     }
     private void resignHandler(UserGameCommand userGameCommand, Session session){
