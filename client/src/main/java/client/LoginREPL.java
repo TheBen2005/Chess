@@ -108,6 +108,7 @@ public class LoginREPL implements NotificationHandler {
                     case "observegame" -> observeGame(params);
                     case "logout" -> logout();
                     case "leave" -> leave();
+                    case "resign" -> resign();
                     /*case "highlight" -> highlight();
                     case "resign" -> resign();
                     case "make move" -> makeMove();
@@ -180,7 +181,13 @@ public class LoginREPL implements NotificationHandler {
 
     }
 
-    public void resign(){
+    public String resign() throws Exception{
+        if (state != State.GAMEPLAY){
+            throw new Exception("Not in game yet");
+        }
+        ws.resign(authtoken, game_id, username);
+        return "You resigned.";
+
 
     }
 

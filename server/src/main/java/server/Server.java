@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import model.GameData;
 import websocket.messages.ServerMessage;
 import io.javalin.websocket.WsMessageContext;
@@ -137,7 +138,29 @@ public class Server {
 
 
     }
-    private void resignHandler(UserGameCommand userGameCommand, Session session){
+    private void resignHandler(UserGameCommand userGameCommand, Session session) throws IOException, DataAccessException {
+        String userName = userGameCommand.getUserName();
+        int gameId = userGameCommand.getGameID();
+        var message = String.format("%s resigned the game", userName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, "");
+        connections.broadcast(serverMessage, gameId, userName);
+        MySqlDataAccess dataAccess = new MySqlDataAccess();
+        GameData game = dataAccess.getGame(gameId);
+        if(game == null){
+            return;
+        }
+        ChessGame chessGame = game.game();
+        chessGame.setTeamTurn(null);
+        GameData newData = new GameData(gameId, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+        if(newData != null){
+            dataAccess.updateGame(newData);
+            System.out.println("success");
+        }
+
+
+
+
+
 
     }
 
