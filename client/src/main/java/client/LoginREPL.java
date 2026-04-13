@@ -59,7 +59,9 @@ public class LoginREPL implements NotificationHandler {
     }
 
     public void error(ServerMessage serverMessage){
-
+        String message = serverMessage.getServerMessage();
+        System.out.println(message);
+        printPrompt();
 
     }
 
