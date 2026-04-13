@@ -1,6 +1,8 @@
 package server;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import model.GameData;
 import websocket.messages.ServerMessage;
 import io.javalin.websocket.WsMessageContext;
@@ -59,7 +61,7 @@ public class Server {
 
     }
 
-    private void webSocketHandlerHelper(WsMessageContext userInfo) throws IOException, DataAccessException{
+    private void webSocketHandlerHelper(WsMessageContext userInfo) throws IOException, DataAccessException, InvalidMoveException {
         var serializer = new Gson();
         UserGameCommand userGameCommand = serializer.fromJson(userInfo.message(), UserGameCommand.class);
         if(userGameCommand.getCommandType() == UserGameCommand.CommandType.CONNECT){
@@ -110,7 +112,50 @@ public class Server {
 
 
     }
-    private void makeMoveHandler(UserGameCommand userGameCommand, Session session){
+    private void makeMoveHandler(UserGameCommand userGameCommand, Session session) throws DataAccessException, InvalidMoveException, IOException {
+        String userName = userGameCommand.getUserName();
+        int gameId = userGameCommand.getGameID();
+        String playerColor = userGameCommand.getPlayerColor();
+        MySqlDataAccess dataAccess = new MySqlDataAccess();
+        GameData game = dataAccess.getGame(gameId);
+        ChessGame chessGame = game.game();
+        ChessMove move = userGameCommand.getMove();
+        chessGame.makeMove(move);
+        GameData newData = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+        dataAccess.updateGame(newData);
+        var message = String.format("%s moved from %s to %s", userName, userGameCommand.getMoveOne(), userGameCommand.getMoveTwo());
+        var serverMessageGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, playerColor);
+        connections.broadcast(serverMessageGame, gameId, playerColor);
+        connections.specific_user(session, serverMessageGame, gameId, userName);
+        var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, playerColor);
+        connections.broadcast(serverMessageNotification, gameId, playerColor);
+        if(playerColor.equals("WHITE")){
+            if(chessGame.isInCheck(ChessGame.TeamColor.BLACK)){
+                var checkMessage = String.format("check");
+                var checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, playerColor);
+                connections.broadcast(checkNotification, gameId, playerColor);
+                connections.specific_user(session, checkNotification, gameId, userName);
+            }
+            else if(chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)){
+                var checkMateMessage = String.format("check");
+                var checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMateMessage, playerColor);
+                connections.broadcast(checkMateNotification, gameId, playerColor);
+                connections.specific_user(session, checkMateNotification, gameId, userName);
+            }
+            else if(chessGame.isInStalemate(ChessGame.TeamColor.BLACK)){
+                var staleMateMessage = String.format("stalemate");
+                var stalemateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, staleMateMessage, playerColor);
+                connections.broadcast(stalemateNotification, gameId, playerColor);
+                connections.specific_user(session, stalemateNotification, gameId, userName);
+            }
+
+
+        }
+
+
+
+
+
 
     }
     private void leaveHandler(UserGameCommand userGameCommand, Session session) throws IOException, DataAccessException {

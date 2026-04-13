@@ -6,6 +6,9 @@ import java.util.Scanner;
 import java.util.List;
 
 
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;
@@ -31,6 +34,7 @@ public class LoginREPL implements NotificationHandler {
     private final WebSocketFacade ws;
     private String username = "";
     private int game_id;
+    private String playerColor;
 
 
     public LoginREPL(String serverUrl) throws Exception {
@@ -55,6 +59,7 @@ public class LoginREPL implements NotificationHandler {
     }
 
     public void error(ServerMessage serverMessage){
+
 
     }
 
@@ -109,6 +114,7 @@ public class LoginREPL implements NotificationHandler {
                     case "logout" -> logout();
                     case "leave" -> leave();
                     case "resign" -> resign();
+                    case "makemove" -> makeMove(params);
                     /*case "highlight" -> highlight();
                     case "resign" -> resign();
                     case "make move" -> makeMove();
@@ -159,10 +165,85 @@ public class LoginREPL implements NotificationHandler {
 
     }
 
-    public void makeMove(){
+    public String makeMove(String... params) throws Exception{
 
+        if (state != State.GAMEPLAY){
+            throw new Exception("Not in game yet");
+        }
+        String moveOne = params[0];
+        String moveTwo = params[1];
+
+        char colLetterOne = moveOne.charAt(0);
+        char colLetterTwo = moveTwo.charAt(0);
+        int colOne = letterToColumn(colLetterOne);
+        int colTwo = letterToColumn(colLetterTwo);
+        char rowLetterOne = moveOne.charAt(1);
+        char rowLetterTwo = moveTwo.charAt(1);
+        int rowOne = Integer.parseInt(String.valueOf(rowLetterOne));
+        int rowTwo = Integer.parseInt(String.valueOf(rowLetterTwo));
+
+        ChessPosition positionOne = new ChessPosition(rowOne, colOne);
+        ChessPosition positionTwo = new ChessPosition(rowTwo, colTwo);
+        ChessMove move = new ChessMove(positionOne, positionTwo, null);
+        if(params.length == 3) {
+            String pieceType = params[2];
+            if(pieceType.equals("pawn")){
+                move = new ChessMove(positionOne, positionTwo, ChessPiece.PieceType.PAWN);
+            }
+            else if(pieceType.equals("rook")){
+                move = new ChessMove(positionOne, positionTwo, ChessPiece.PieceType.ROOK);
+            }
+            else if(pieceType.equals("queen")){
+                move = new ChessMove(positionOne, positionTwo, ChessPiece.PieceType.QUEEN);
+            }
+            else if(pieceType.equals("king")){
+                move = new ChessMove(positionOne, positionTwo, ChessPiece.PieceType.KING);
+            }
+            else if(pieceType.equals("bishop")){
+                move = new ChessMove(positionOne, positionTwo, ChessPiece.PieceType.BISHOP);
+            }
+            else if(pieceType.equals("knight")){
+                move = new ChessMove(positionOne, positionTwo, ChessPiece.PieceType.KNIGHT);
+            }
+
+        }
+        ws.makeMove(authtoken, game_id, username, move, playerColor, moveOne, moveTwo);
+
+
+
+        return "move made.";
 
     }
+    private int letterToColumn(char character){
+        int column = 0;
+        if(character == 'a'){
+            column = 1;
+        }
+        else if(character == 'b'){
+            column = 2;
+        }
+        else if(character == 'c'){
+            column = 3;
+        }
+        else if(character == 'd'){
+            column = 4;
+        }
+        else if(character == 'e'){
+            column = 5;
+        }
+        else if(character == 'f'){
+            column = 6;
+        }
+        else if(character == 'g'){
+            column = 7;
+        }
+        else if(character == 'h'){
+            column = 8;
+        }
+        return column;
+
+    }
+
 
     public void redraw(String... params){
 
@@ -288,6 +369,7 @@ public class LoginREPL implements NotificationHandler {
             return("Not logged in yet.");
         }
         String playercolor = params[0].toUpperCase();
+        playerColor = playercolor;
         try {
             int gameID = Integer.parseInt(params[1]);
             ListGamesRequest listGamesRequest = new ListGamesRequest(authtoken);

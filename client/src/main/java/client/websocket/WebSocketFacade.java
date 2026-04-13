@@ -1,4 +1,5 @@
 package client.websocket;
+import chess.ChessMove;
 import client.LoginREPL;
 import com.google.gson.Gson;
 import websocket.messages.ServerMessage;
@@ -58,7 +59,7 @@ public class WebSocketFacade extends Endpoint{
 
     public void connect(String authToken, Integer gameID, String userName, String playerColor) throws Exception{
         try{
-            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, userName, playerColor);
+            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, userName, playerColor, null, "", "");
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (Exception exception){
             throw new Exception(exception.getMessage());
@@ -66,9 +67,9 @@ public class WebSocketFacade extends Endpoint{
 
     }
 
-    public void makeMove(String authToken, Integer gameID, String userName, String playerColor) throws Exception{
+    public void makeMove(String authToken, Integer gameID, String userName, ChessMove move, String playerColor, String moveOne, String moveTwo) throws Exception{
         try{
-            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, userName, playerColor);
+            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, userName, playerColor, move, moveOne, moveTwo);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (Exception exception){
             throw new Exception(exception.getMessage());
@@ -77,7 +78,7 @@ public class WebSocketFacade extends Endpoint{
     }
     public void leave(String authToken, Integer gameID, String userName) throws Exception{
         try{
-            var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, userName, "");
+            var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, userName, "", null, "", "");
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (Exception exception){
             throw new Exception(exception.getMessage());
@@ -86,7 +87,7 @@ public class WebSocketFacade extends Endpoint{
     }
     public void resign(String authToken, Integer gameID, String userName) throws Exception{
         try{
-            var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID, userName, "");
+            var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID, userName, "", null, "", "");
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (Exception exception){
             throw new Exception(exception.getMessage());
