@@ -45,10 +45,10 @@ public class LoginREPL implements NotificationHandler {
     public void loadGame(ServerMessage serverMessage) {
         String color = serverMessage.getPlayerColor();
         if(color.equals("white")){
-            ui.BoardDraw.drawBoard(true);
+            ui.LiveBoard.drawBoard(true);
         }
         else if(color.equals("black")){
-            ui.BoardDraw.drawBoard(false);
+            ui.LiveBoard.drawBoard(false);
         }
 
         System.out.println("This is working");
@@ -248,6 +248,7 @@ public class LoginREPL implements NotificationHandler {
 
 
     public void redraw(String... params){
+
 
     }
 
