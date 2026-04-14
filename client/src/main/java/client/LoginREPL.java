@@ -6,6 +6,7 @@ import java.util.Scanner;
 import java.util.List;
 
 
+import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
@@ -35,6 +36,7 @@ public class LoginREPL implements NotificationHandler {
     private String username = "";
     private int game_id;
     private String playerColor;
+    private ChessGame game;
 
 
     public LoginREPL(String serverUrl) throws Exception {
@@ -44,11 +46,13 @@ public class LoginREPL implements NotificationHandler {
 
     public void loadGame(ServerMessage serverMessage) {
         String color = serverMessage.getPlayerColor();
+        game = serverMessage.getGame();
+
         if(color.equals("white")){
-            ui.LiveBoard.drawBoard(true);
+            ui.LiveBoard.drawBoard(true, game, null);
         }
         else if(color.equals("black")){
-            ui.LiveBoard.drawBoard(false);
+            ui.LiveBoard.drawBoard(false, game, null);
         }
 
         System.out.println("This is working");
@@ -117,6 +121,8 @@ public class LoginREPL implements NotificationHandler {
                     case "leave" -> leave();
                     case "resign" -> resign();
                     case "makemove" -> makeMove(params);
+                    case "highlight" -> highlight(params);
+                    case "redraw" -> redraw();
                     /*case "highlight" -> highlight();
                     case "resign" -> resign();
                     case "make move" -> makeMove();
@@ -163,7 +169,17 @@ public class LoginREPL implements NotificationHandler {
 
     }
 
-    public void highlight(){
+    public String highlight(String... params){
+        String coordinate = params[0].toLowerCase();
+        char colLetter = coordinate.charAt(0);
+        int col = letterToColumn(colLetter);
+        char rowLetter = coordinate.charAt(1);
+        int row = Integer.parseInt(String.valueOf(rowLetter));
+        ChessPosition position = new ChessPosition(row, col);
+        ui.LiveBoard.drawBoard(true, game, position);
+        return "You highlighted moves.";
+
+
 
     }
 
@@ -247,7 +263,15 @@ public class LoginREPL implements NotificationHandler {
     }
 
 
-    public void redraw(String... params){
+    public String redraw(){
+        if(playerColor.equals("WHITE")){
+            ui.LiveBoard.drawBoard(true, game, null);
+        }
+        else{
+            ui.LiveBoard.drawBoard(false, game, null);
+        }
+        return "Board redrawn";
+
 
 
     }
@@ -472,7 +496,15 @@ public class LoginREPL implements NotificationHandler {
         }
 
         if(state == State.GAMEPLAY){
-            return "game";
+            return """
+                    - resign - ends game
+                    - makemove <coordinate one> <coordinate two>- makes move
+                    - highlight <coordinate>- highlights moves of coordinate
+                    - leave - leaves game
+                    - help - with possible commands
+                    - redraw - redraws chessboard
+                    
+                    """;
 
 
 

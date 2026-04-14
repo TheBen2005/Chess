@@ -1,12 +1,10 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Random;
 
 import static ui.EscapeSequences.*;
@@ -30,19 +28,24 @@ public class LiveBoard {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         out.print(ERASE_SCREEN);
+        ChessGame game = new ChessGame();
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+        game.setBoard(board);
+        ChessPosition position = new ChessPosition(3, 3);
 
-        drawBoard(false);
+        drawBoard(false, game, position);
 
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
-    public static void drawBoard(boolean color) {
+    public static void drawBoard(boolean color, ChessGame game, ChessPosition position) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         drawHeaders(out, color);
         out.print(RESET_BG_COLOR);
 
-        drawChess(out, color);
+        drawChess(out, color, game, position);
         out.println();
         drawHeaders(out, color);
 
@@ -70,11 +73,7 @@ public class LiveBoard {
         out.print(RESET_TEXT_COLOR);
     }
 
-    public static void drawChess(PrintStream out, Boolean color){
-        ChessGame game = new ChessGame();
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-        game.setBoard(board);
+    public static void drawChess(PrintStream out, Boolean color, ChessGame game, ChessPosition position){
 
         int firstRow = 8;
         int endRow = 1;
@@ -110,9 +109,25 @@ public class LiveBoard {
                     else{
                         column = 9 - j;
                     }
+                    ChessPosition currentPosition = new ChessPosition(i, column);
+                    ChessPiece piece = game.getBoard().getPiece(currentPosition);
+                    Boolean shouldHighlight = false;
+                    if(position != null) {
+                        Collection<ChessMove> highlightedMoves = game.validMoves(position);
 
-                    ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, column));
+                        for (ChessMove move : highlightedMoves) {
+                            ChessPosition endPosition = move.getEndPosition();
+                            int targetRow = endPosition.getRow();
+                            int targetCol = endPosition.getColumn();
+                            if (i == targetRow && column == targetCol) {
+                                shouldHighlight = true;
+
+                            }
+                        }
+                    }
+
                     if ((j + i) % 2 == 0) {
+
                         if(color == true) {
                             out.print(SET_BG_COLOR_BLUE);
                         }
@@ -126,6 +141,9 @@ public class LiveBoard {
                         else{
                             out.print(SET_BG_COLOR_BLUE);
                         }
+                    }
+                    if(shouldHighlight == true){
+                        out.print(SET_BG_COLOR_YELLOW);
                     }
                     if (piece == null) {
                         out.print(" ");

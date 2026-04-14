@@ -1,5 +1,7 @@
 package websocket.messages;
 
+import chess.ChessGame;
+
 import java.util.Objects;
 
 /**
@@ -12,6 +14,7 @@ public class ServerMessage {
     ServerMessageType serverMessageType;
     String message;
     String playerColor;
+    ChessGame game;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -21,10 +24,11 @@ public class ServerMessage {
 
 
 
-    public ServerMessage(ServerMessageType type, String message, String playerColor) {
+    public ServerMessage(ServerMessageType type, String message, String playerColor, ChessGame game) {
         this.serverMessageType = type;
         this.message = message;
         this.playerColor = playerColor;
+        this.game = game;
 
     }
 
@@ -37,6 +41,7 @@ public class ServerMessage {
     public String getPlayerColor() {
         return this.playerColor;
     }
+    public ChessGame getGame(){return this.game;}
 
     @Override
     public boolean equals(Object o) {
