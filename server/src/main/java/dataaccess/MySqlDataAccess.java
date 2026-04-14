@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dataaccess.DataAccessException;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -138,7 +139,7 @@ public class MySqlDataAccess implements DataAccess {
         String blackUsername = gameData.blackUsername();
         String gameName = gameData.gameName();
         ChessGame game = gameData.game();
-        String json = new Gson().toJson(game);
+        String json = new GsonBuilder().serializeNulls().create().toJson(game);
         int id = executeUpdate(statement, whiteUsername, blackUsername, gameName, json, gameID);
 
 

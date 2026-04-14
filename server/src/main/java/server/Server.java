@@ -3,6 +3,7 @@ package server;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.InvalidMoveException;
+import model.AuthData;
 import model.GameData;
 import websocket.messages.ServerMessage;
 import io.javalin.websocket.WsMessageContext;
@@ -77,20 +78,40 @@ public class Server {
             makeMoveHandler(userGameCommand, userInfo.session);
         }
     }
-    private void connectHandler(UserGameCommand userGameCommand, Session session) throws IOException {
+    private void connectHandler(UserGameCommand userGameCommand, Session session) throws IOException, DataAccessException {
         int gameId = userGameCommand.getGameID();
-        String userName = userGameCommand.getUserName();
-        try {
+        String authToken = userGameCommand.getAuthToken();
+        MySqlDataAccess dataAccess = new MySqlDataAccess();
+        AuthData auth = dataAccess.getAuth(authToken);
+        if(auth == null){
+            var message = String.format("Error: Not authrized");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
+        String userName = auth.username();
+        GameData game = dataAccess.getGame(gameId);
+        if(game == null){
+            var message = String.format("Error: Game not Found");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
+        String playerColor = "";
+        boolean isPlaying = true;
+        String whiteUsername = game.whiteUsername();
+        String blackUsername = game.blackUsername();
+        if(userName.equals(whiteUsername)){
+            playerColor = "white";
+        }
+        else if(userName.equals(blackUsername)){
+            playerColor = "black";
+        }
+        else{
+            playerColor = "observe";
+            isPlaying = false;
+        }
 
-            String playerColor = userGameCommand.getPlayerColor();
-            boolean isPlaying = true;
-            if (playerColor.equals("WHITE")) {
-                playerColor = "white";
-            } else if (playerColor.equals("BLACK")) {
-                playerColor = "black";
-            } else if (playerColor.equals("observe")) {
-                isPlaying = false;
-            }
+
+        try {
             connections.add(session, userName, gameId);
             var message = "";
             if (isPlaying) {
@@ -98,28 +119,25 @@ public class Server {
             } else {
                 message = String.format("%s is observing", userName);
             }
-            MySqlDataAccess dataAccess = new MySqlDataAccess();
-            GameData game = dataAccess.getGame(gameId);
             ChessGame chessGame = game.game();
-            var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, playerColor, chessGame);
+            var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null, playerColor, null);
             connections.broadcast(serverMessage, gameId, userName);
-            var gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, playerColor, chessGame);
+            var gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, playerColor, chessGame);
             if (isPlaying) {
-                gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, playerColor, chessGame);
+                gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, playerColor, chessGame);
             } else {
-                gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, "white", chessGame);
+                gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null,"white", chessGame);
             }
             connections.specific_user(session, gameServerMessage, gameId, userName);
         }
         catch(IOException exception){
-            var message = String.format("failed to connect");
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, userName );
+            var message = String.format("Error: failed to connect");
+            connections.sendErrorNoUser(session, message);
         }
         catch(Exception exception){
             var message = exception.getMessage();
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, userName);
+            var errorMessage = String.format("Error: " + message);
+            connections.sendErrorNoUser(session, errorMessage);
 
         }
 
@@ -127,16 +145,55 @@ public class Server {
     }
     private void makeMoveHandler(UserGameCommand userGameCommand, Session session) throws DataAccessException, InvalidMoveException, IOException {
         int gameId = userGameCommand.getGameID();
+        String authToken = userGameCommand.getAuthToken();
+        MySqlDataAccess dataAccess = new MySqlDataAccess();
+        AuthData auth = dataAccess.getAuth(authToken);
+        if(auth == null){
+            var message = String.format("Error: Not authrized");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
+        String userName = auth.username();
+        GameData game = dataAccess.getGame(gameId);
+        if(game == null){
+            var message = String.format("Error: Game not Found");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
+        String playerColor = "";
+        String whiteUsername = game.whiteUsername();
+        String blackUsername = game.blackUsername();
+        if(userName.equals(whiteUsername)){
+            playerColor = "white";
+        }
+        else if(userName.equals(blackUsername)){
+            playerColor = "black";
+        }
+        else{
+            playerColor = "observe";
+        }
         try {
-            String userName = userGameCommand.getUserName();
-            String playerColor = userGameCommand.getPlayerColor();
-            MySqlDataAccess dataAccess = new MySqlDataAccess();
-            GameData game = dataAccess.getGame(gameId);
             ChessGame chessGame = game.game();
+            if(playerColor.equals("observe")){
+                var message = String.format("Error: Obeservor cannot make a move");
+                connections.sendErrorNoUser(session, message);
+                return;
+            }
+            if(playerColor.equals("white") && chessGame.getTeamTurn() != ChessGame.TeamColor.WHITE){
+                var message = String.format("Error: Not your turn");
+                connections.sendErrorNoUser(session, message);
+                return;
+
+            }
+            if(playerColor.equals("black") && chessGame.getTeamTurn() != ChessGame.TeamColor.BLACK){
+                var message = String.format("Error: Not your turn");
+                connections.sendErrorNoUser(session, message);
+                return;
+
+            }
             if(chessGame.getTeamTurn() == null){
                 var message = String.format("Game is already Over");
-                var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-                connections.specific_user(session, errorMessage, gameId, "" );
+                connections.sendErrorNoUser(session, message);
                 return;
             }
             ChessMove move = userGameCommand.getMove();
@@ -144,15 +201,15 @@ public class Server {
             GameData newData = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
             dataAccess.updateGame(newData);
             var message = String.format("%s moved from %s to %s", userName, userGameCommand.getMoveOne(), userGameCommand.getMoveTwo());
-            var serverMessageGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, playerColor, chessGame);
+            var serverMessageGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, playerColor, chessGame);
             connections.broadcast(serverMessageGame, gameId, userName);
             connections.specific_user(session, serverMessageGame, gameId, userName);
-            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, playerColor, chessGame);
+            var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null, playerColor, null);
             connections.broadcast(serverMessageNotification, gameId, userName);
-            if (playerColor.equals("WHITE")) {
+            if (playerColor.equals("white")) {
                 if (chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
                     var checkMateMessage = String.format("checkmate");
-                    var checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMateMessage, playerColor, chessGame);
+                    var checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMateMessage, null, playerColor, null);
                     connections.broadcast(checkMateNotification, gameId, userName);
                     connections.specific_user(session, checkMateNotification, gameId, userName);
                     chessGame.setTeamTurn(null);
@@ -161,7 +218,7 @@ public class Server {
                 }
                 else if (chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
                     var staleMateMessage = String.format("stalemate");
-                    var stalemateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, staleMateMessage, playerColor, chessGame);
+                    var stalemateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, staleMateMessage, null, playerColor, null);
                     connections.broadcast(stalemateNotification, gameId, userName);
                     connections.specific_user(session, stalemateNotification, gameId, userName);
                     chessGame.setTeamTurn(null);
@@ -170,16 +227,16 @@ public class Server {
                 }
                 else if (chessGame.isInCheck(ChessGame.TeamColor.BLACK)) {
                     var checkMessage = String.format("check");
-                    var checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, playerColor, chessGame);
+                    var checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, playerColor, null);
                     connections.broadcast(checkNotification, gameId, userName);
                     connections.specific_user(session, checkNotification, gameId, userName);
                 }
             }
 
-            else if (playerColor.equals("BLACK")) {
+            else if (playerColor.equals("black")) {
                 if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE)) {
                     var checkMateMessage = String.format("checkmate");
-                    var checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMateMessage, playerColor, chessGame);
+                    var checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMateMessage, null, playerColor, null);
                     connections.broadcast(checkMateNotification, gameId, userName);
                     connections.specific_user(session, checkMateNotification, gameId, userName);
                     chessGame.setTeamTurn(null);
@@ -188,7 +245,7 @@ public class Server {
                 }
                 else if (chessGame.isInStalemate(ChessGame.TeamColor.WHITE)) {
                     var staleMateMessage = String.format("stalemate");
-                    var stalemateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, staleMateMessage, playerColor, chessGame);
+                    var stalemateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, staleMateMessage, null, playerColor, null);
                     connections.broadcast(stalemateNotification, gameId, userName);
                     connections.specific_user(session, stalemateNotification, gameId, userName);
                     chessGame.setTeamTurn(null);
@@ -197,34 +254,31 @@ public class Server {
                 }
                 else if (chessGame.isInCheck(ChessGame.TeamColor.WHITE)) {
                     var checkMessage = String.format("check");
-                    var checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, playerColor, chessGame);
+                    var checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, null, playerColor, null);
                     connections.broadcast(checkNotification, gameId, userName);
                     connections.specific_user(session, checkNotification, gameId, userName);
                 }
             }
         }
         catch(IOException exception){
-            var message = String.format("Failed to connect");
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var message = String.format("Error: failed to connect");
+            connections.sendErrorNoUser(session, message);
 
         }
         catch(InvalidMoveException exception){
-            var message = String.format("Move not legal");
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var message = String.format("Error: move not legal");
+            connections.sendErrorNoUser(session, message);
 
         }
         catch(DataAccessException exception){
-            var message = String.format("Couldn't find game");
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var message = String.format("Error: failed to access game");
+            connections.sendErrorNoUser(session, message);
 
         }
         catch(Exception exception){
             var message = exception.getMessage();
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var errorMessage = String.format("Error: " + message);
+            connections.sendErrorNoUser(session, errorMessage);
 
         }
 
@@ -235,15 +289,40 @@ public class Server {
 
     }
     private void leaveHandler(UserGameCommand userGameCommand, Session session) throws IOException, DataAccessException {
-        String userName = userGameCommand.getUserName();
         int gameId = userGameCommand.getGameID();
+        String authToken = userGameCommand.getAuthToken();
+        MySqlDataAccess dataAccess = new MySqlDataAccess();
+        AuthData auth = dataAccess.getAuth(authToken);
+        if(auth == null){
+            var message = String.format("Error: Not authrized");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
+        String userName = auth.username();
+        GameData game = dataAccess.getGame(gameId);
+        if(game == null){
+            var message = String.format("Error: Game not Found");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
+        String playerColor = "";
+        String whiteUsername = game.whiteUsername();
+        String blackUsername = game.blackUsername();
+        if(userName.equals(whiteUsername)){
+            playerColor = "white";
+        }
+        else if(userName.equals(blackUsername)){
+            playerColor = "black";
+        }
+        else{
+            playerColor = "observe";
+        }
+
         try {
-            MySqlDataAccess dataAccess = new MySqlDataAccess();
-            GameData game = dataAccess.getGame(gameId);
             ChessGame chessGame = game.game();
             connections.remove(session, userName, gameId);
             var message = String.format("%s left the game", userName);
-            var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, "", chessGame);
+            var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null,"", null);
             connections.broadcast(serverMessage, gameId, userName);
             if (game == null) {
                 return;
@@ -259,20 +338,18 @@ public class Server {
             }
         }
         catch(IOException exception){
-            var message = String.format("failed to connect");
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var message = String.format("Error: failed to connect");
+            connections.sendErrorNoUser(session, message);
         }
         catch(DataAccessException exception){
-            var message = String.format("failed to access game");
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var message = String.format("Error: failed to access game");
+            connections.sendErrorNoUser(session, message);
 
         }
         catch(Exception exception){
             var message = exception.getMessage();
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var errorMessage = String.format("Error: " + message);
+            connections.sendErrorNoUser(session, errorMessage);
 
         }
 
@@ -280,13 +357,47 @@ public class Server {
     }
     private void resignHandler(UserGameCommand userGameCommand, Session session) throws IOException, DataAccessException {
         int gameId = userGameCommand.getGameID();
+        String authToken = userGameCommand.getAuthToken();
+        MySqlDataAccess dataAccess = new MySqlDataAccess();
+        AuthData auth = dataAccess.getAuth(authToken);
+        if(auth == null){
+            var message = String.format("Error: Not authrized");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
+        String userName = auth.username();
+        GameData game = dataAccess.getGame(gameId);
+        if(game == null){
+            var message = String.format("Error: Game not Found");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
+        ChessGame chessGame = game.game();
+        String playerColor = "";
+        String whiteUsername = game.whiteUsername();
+        String blackUsername = game.blackUsername();
+        if(userName.equals(whiteUsername)){
+            playerColor = "white";
+        }
+        else if(userName.equals(blackUsername)){
+            playerColor = "black";
+        }
+        else{
+            playerColor = "observe";
+        }
+        if(playerColor.equals("observe")){
+            var message = String.format("Error: Observor cannot resign");
+            connections.sendErrorNoUser(session, message);
+            return;
+        }
         try {
-            MySqlDataAccess dataAccess = new MySqlDataAccess();
-            GameData game = dataAccess.getGame(gameId);
-            ChessGame chessGame = game.game();
-            String userName = userGameCommand.getUserName();
+            if(chessGame.getTeamTurn() == null){
+                var message = String.format("Game is already Over");
+                connections.sendErrorNoUser(session, message);
+                return;
+            }
             var message = String.format("%s resigned the game", userName);
-            var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, "", chessGame);
+            var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, null, playerColor, null);
             connections.broadcast(serverMessage, gameId, userName);
             connections.specific_user(session, serverMessage, gameId, userName);
 
@@ -298,23 +409,22 @@ public class Server {
             if (newData != null) {
                 dataAccess.updateGame(newData);
                 System.out.println("success");
+
             }
         }
         catch(IOException exception){
-            var message = String.format("failed to connect");
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var message = String.format("Error: failed to connect");
+            connections.sendErrorNoUser(session, message);
         }
         catch(DataAccessException exception){
-            var message = String.format("failed to access game");
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var message = String.format("Error: failed to access game");
+            connections.sendErrorNoUser(session, message);
 
         }
         catch(Exception exception){
             var message = exception.getMessage();
-            var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            var errorMessage = String.format("Error: " + message);
+            connections.sendErrorNoUser(session, errorMessage);
 
         }
 

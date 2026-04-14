@@ -71,7 +71,7 @@ public class ConnectionManager {
     }
 
     public void sendErrorNoUser(Session session, String message) throws IOException{
-        ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
+        ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, message, null, null);
         Gson gson = new Gson();
         String msg = gson.toJson(error);
         if(session != null){
