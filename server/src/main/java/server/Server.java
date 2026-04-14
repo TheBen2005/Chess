@@ -79,8 +79,9 @@ public class Server {
     }
     private void connectHandler(UserGameCommand userGameCommand, Session session) throws IOException {
         int gameId = userGameCommand.getGameID();
+        String userName = userGameCommand.getUserName();
         try {
-            String userName = userGameCommand.getUserName();
+
             String playerColor = userGameCommand.getPlayerColor();
             boolean isPlaying = true;
             if (playerColor.equals("WHITE")) {
@@ -113,12 +114,12 @@ public class Server {
         catch(IOException exception){
             var message = String.format("failed to connect");
             var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            connections.specific_user(session, errorMessage, gameId, userName );
         }
         catch(Exception exception){
             var message = exception.getMessage();
             var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
-            connections.specific_user(session, errorMessage, gameId, "" );
+            connections.specific_user(session, errorMessage, gameId, userName);
 
         }
 
@@ -132,35 +133,74 @@ public class Server {
             MySqlDataAccess dataAccess = new MySqlDataAccess();
             GameData game = dataAccess.getGame(gameId);
             ChessGame chessGame = game.game();
+            if(chessGame.getTeamTurn() == null){
+                var message = String.format("Game is already Over");
+                var errorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
+                connections.specific_user(session, errorMessage, gameId, "" );
+                return;
+            }
             ChessMove move = userGameCommand.getMove();
             chessGame.makeMove(move);
             GameData newData = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
             dataAccess.updateGame(newData);
             var message = String.format("%s moved from %s to %s", userName, userGameCommand.getMoveOne(), userGameCommand.getMoveTwo());
             var serverMessageGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, message, playerColor, chessGame);
-            connections.broadcast(serverMessageGame, gameId, playerColor);
+            connections.broadcast(serverMessageGame, gameId, userName);
             connections.specific_user(session, serverMessageGame, gameId, userName);
             var serverMessageNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, playerColor, chessGame);
-            connections.broadcast(serverMessageNotification, gameId, playerColor);
+            connections.broadcast(serverMessageNotification, gameId, userName);
             if (playerColor.equals("WHITE")) {
-                if (chessGame.isInCheck(ChessGame.TeamColor.BLACK)) {
-                    var checkMessage = String.format("check");
-                    var checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, playerColor, chessGame);
-                    connections.broadcast(checkNotification, gameId, playerColor);
-                    connections.specific_user(session, checkNotification, gameId, userName);
-                } else if (chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
-                    var checkMateMessage = String.format("check");
+                if (chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                    var checkMateMessage = String.format("checkmate");
                     var checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMateMessage, playerColor, chessGame);
-                    connections.broadcast(checkMateNotification, gameId, playerColor);
+                    connections.broadcast(checkMateNotification, gameId, userName);
                     connections.specific_user(session, checkMateNotification, gameId, userName);
-                } else if (chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                    chessGame.setTeamTurn(null);
+                    GameData newDataTwo = new GameData(gameId, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+                    dataAccess.updateGame(newDataTwo);
+                }
+                else if (chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
                     var staleMateMessage = String.format("stalemate");
                     var stalemateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, staleMateMessage, playerColor, chessGame);
-                    connections.broadcast(stalemateNotification, gameId, playerColor);
+                    connections.broadcast(stalemateNotification, gameId, userName);
                     connections.specific_user(session, stalemateNotification, gameId, userName);
+                    chessGame.setTeamTurn(null);
+                    GameData newDataTwo = new GameData(gameId, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+                    dataAccess.updateGame(newDataTwo);
                 }
+                else if (chessGame.isInCheck(ChessGame.TeamColor.BLACK)) {
+                    var checkMessage = String.format("check");
+                    var checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, playerColor, chessGame);
+                    connections.broadcast(checkNotification, gameId, userName);
+                    connections.specific_user(session, checkNotification, gameId, userName);
+                }
+            }
 
-
+            else if (playerColor.equals("BLACK")) {
+                if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                    var checkMateMessage = String.format("checkmate");
+                    var checkMateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMateMessage, playerColor, chessGame);
+                    connections.broadcast(checkMateNotification, gameId, userName);
+                    connections.specific_user(session, checkMateNotification, gameId, userName);
+                    chessGame.setTeamTurn(null);
+                    GameData newDataTwo = new GameData(gameId, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+                    dataAccess.updateGame(newDataTwo);
+                }
+                else if (chessGame.isInStalemate(ChessGame.TeamColor.WHITE)) {
+                    var staleMateMessage = String.format("stalemate");
+                    var stalemateNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, staleMateMessage, playerColor, chessGame);
+                    connections.broadcast(stalemateNotification, gameId, userName);
+                    connections.specific_user(session, stalemateNotification, gameId, userName);
+                    chessGame.setTeamTurn(null);
+                    GameData newDataTwo = new GameData(gameId, game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+                    dataAccess.updateGame(newDataTwo);
+                }
+                else if (chessGame.isInCheck(ChessGame.TeamColor.WHITE)) {
+                    var checkMessage = String.format("check");
+                    var checkNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, checkMessage, playerColor, chessGame);
+                    connections.broadcast(checkNotification, gameId, userName);
+                    connections.specific_user(session, checkNotification, gameId, userName);
+                }
             }
         }
         catch(IOException exception){
@@ -248,6 +288,7 @@ public class Server {
             var message = String.format("%s resigned the game", userName);
             var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message, "", chessGame);
             connections.broadcast(serverMessage, gameId, userName);
+            connections.specific_user(session, serverMessage, gameId, userName);
 
             if (game == null) {
                 return;

@@ -48,11 +48,11 @@ public class LoginREPL implements NotificationHandler {
         String color = serverMessage.getPlayerColor();
         game = serverMessage.getGame();
 
-        if(color.equals("white")){
-            ui.LiveBoard.drawBoard(true, game, null);
-        }
-        else if(color.equals("black")){
+        if(color.equals("black")){
             ui.LiveBoard.drawBoard(false, game, null);
+        }
+        else{
+            ui.LiveBoard.drawBoard(true, game, null);
         }
 
         System.out.println("This is working");
@@ -293,6 +293,14 @@ public class LoginREPL implements NotificationHandler {
         if (state != State.GAMEPLAY){
             throw new Exception("Not in game yet");
         }
+        System.out.println("Do you want to resign? yes/no");
+        Scanner scanner = new Scanner(System.in);
+        var answer = scanner.nextLine();
+        answer = answer.toLowerCase();
+        if(answer.equals("no")){
+            return "resignation canceled";
+        }
+
         ws.resign(authtoken, game_id, username);
         return "You resigned.";
 

@@ -11,20 +11,26 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
     private int gameId;
-    private List<String> users = new ArrayList<>();
     public final ConcurrentHashMap<Integer, List<String>> connectionsGames = new ConcurrentHashMap<>();
     public final ConcurrentHashMap<String, Session> connectionsUsers = new ConcurrentHashMap<>();
 
     public void add(Session session, String userName, int gameId){
         connectionsUsers.put(userName, session);
+        List<String> users = connectionsGames.get(gameId);
+        if(users == null){
+            users = new ArrayList<>();
+            connectionsGames.put(gameId, users);
+
+        }
         users.add(userName);
-        connectionsGames.put(gameId, users);
     }
 
     public void remove(Session session, String userName, int gameId){
         connectionsUsers.remove(userName, session);
-        users.remove(userName);
-        connectionsGames.put(gameId, users);
+        List<String> users = connectionsGames.get(gameId);
+        if(users != null){
+            users.remove(userName);
+        }
     }
 
     public void specific_user(Session session, ServerMessage serverMessage, int gameId, String userName) throws IOException {
@@ -61,6 +67,17 @@ public class ConnectionManager {
                 }
             }
 
+        }
+    }
+
+    public void sendErrorNoUser(Session session, String message) throws IOException{
+        ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message, "", null);
+        Gson gson = new Gson();
+        String msg = gson.toJson(error);
+        if(session != null){
+            if(session.isOpen()){
+                session.getRemote().sendString(msg);
+            }
         }
     }
 }
