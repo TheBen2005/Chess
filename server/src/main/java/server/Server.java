@@ -56,7 +56,7 @@ public class Server {
             });
             ws.onMessage(ctx -> webSocketHandlerHelper(ctx));
 
-            ws.onClose(_ -> System.out.println("Websocket closed"));
+            ws.onClose(ctx -> System.out.println("Websocket closed"));
         });
 
 
